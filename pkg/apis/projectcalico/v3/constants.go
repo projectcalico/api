@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico
+package v3
 
 const (
 	// API group details for the Calico v3 API.

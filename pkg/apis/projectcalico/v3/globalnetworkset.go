@@ -12,12 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico
+package v3
+
+import (
+	calico "github.com/projectcalico/libcalico-go/lib/apis/v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 const (
 	KindGlobalNetworkSet     = "GlobalNetworkSet"
 	KindGlobalNetworkSetList = "GlobalNetworkSetList"
 )
+
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// GlobalNetworkSetList is a list of NetworkSet objects.
+type GlobalNetworkSetList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Items []GlobalNetworkSet `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type GlobalNetworkSet struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Spec calico.GlobalNetworkSetSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+}
 
 // GlobalNetworkSetSpec contains the specification for a NetworkSet resource.
 type GlobalNetworkSetSpec struct {

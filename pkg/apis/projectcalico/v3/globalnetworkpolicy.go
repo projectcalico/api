@@ -12,12 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico
+package v3
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 const (
 	KindGlobalNetworkPolicy     = "GlobalNetworkPolicy"
 	KindGlobalNetworkPolicyList = "GlobalNetworkPolicyList"
 )
+
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// GlobalNetworkPolicyList is a list of Policy objects.
+type GlobalNetworkPolicyList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Items []GlobalNetworkPolicy `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type GlobalNetworkPolicy struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Spec GlobalNetworkPolicySpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+}
 
 type GlobalNetworkPolicySpec struct {
 	// Order is an optional field that specifies the order in which the policy is applied.

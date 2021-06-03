@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico
+package v3
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,6 +22,29 @@ const (
 	KindKubeControllersConfiguration     = "KubeControllersConfiguration"
 	KindKubeControllersConfigurationList = "KubeControllersConfigurationList"
 )
+
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// KubeControllersConfigurationList contains a list of KubeControllersConfiguration object.
+type KubeControllersConfigurationList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Items []KubeControllersConfiguration `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type KubeControllersConfiguration struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Spec   KubeControllersConfigurationSpec   `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Status KubeControllersConfigurationStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
+}
 
 // KubeControllersConfigurationSpec contains the values of the Kubernetes controllers configuration.
 type KubeControllersConfigurationSpec struct {

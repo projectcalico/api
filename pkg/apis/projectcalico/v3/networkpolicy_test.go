@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico_test
+package v3_test
 
 import (
 	"reflect"

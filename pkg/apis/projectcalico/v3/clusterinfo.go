@@ -1,4 +1,4 @@
-// Copyright (c) 2017, 20201 Tigera, Inc. All rights reserved.
+// Copyright (c) 2017, 2020-2021 Tigera, Inc. All rights reserved.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico
+package v3
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 const (
 	KindClusterInformation     = "ClusterInformation"
 	KindClusterInformationList = "ClusterInformationList"
 )
+
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// ClusterInformationList is a list of ClusterInformation objects.
+type ClusterInformationList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Items []ClusterInformation `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type ClusterInformation struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Spec ClusterInformationSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+}
 
 // ClusterInformationSpec contains the values of describing the cluster.
 type ClusterInformationSpec struct {

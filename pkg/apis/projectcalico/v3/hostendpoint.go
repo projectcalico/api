@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico
+package v3
 
 import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/projectcalico/api/pkg/lib/numorstring"
 )
 
@@ -22,6 +24,28 @@ const (
 	KindHostEndpoint     = "HostEndpoint"
 	KindHostEndpointList = "HostEndpointList"
 )
+
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// HostEndpointList is a list of HostEndpoint objects.
+type HostEndpointList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Items []HostEndpoint `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type HostEndpoint struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Spec HostEndpointSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+}
 
 // HostEndpointSpec contains the specification for a HostEndpoint resource.
 type HostEndpointSpec struct {

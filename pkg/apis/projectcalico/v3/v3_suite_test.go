@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2021 Tigera, Inc. All rights reserved.
+// Copyright (c) 2017-2018 Tigera, Inc. All rights reserved.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico
+package v3_test
 
-const (
-	KindIPAMConfig     = "IPAMConfig"
-	KindIPAMConfigList = "IPAMConfigList"
+import (
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	"testing"
+
+	"github.com/onsi/ginkgo/reporters"
 )
 
-// IPAMConfigSpec contains the specification for an IPAMConfig resource.
-type IPAMConfigSpec struct {
-	StrictAffinity     bool `json:"strictAffinity"`
-	AutoAllocateBlocks bool `json:"autoAllocateBlocks"`
-
-	// MaxBlocksPerHost, if non-zero, is the max number of blocks that can be
-	// affine to each host.
-	// +optional
-	MaxBlocksPerHost int `json:"maxBlocksPerHost,omitempty"`
+func TestV2(t *testing.T) {
+	RegisterFailHandler(Fail)
+	junitReporter := reporters.NewJUnitReporter("../../../report/v3_api_suite.xml")
+	RunSpecsWithDefaultAndCustomReporters(t, "v3 API Suite", []Reporter{junitReporter})
 }

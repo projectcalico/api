@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package calico
+package v3
 
 import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	k8sv1 "k8s.io/api/core/v1"
 
 	"github.com/projectcalico/api/pkg/lib/numorstring"
@@ -24,6 +26,28 @@ const (
 	KindBGPPeer     = "BGPPeer"
 	KindBGPPeerList = "BGPPeerList"
 )
+
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// BGPPeerList is a list of BGPPeer resources.
+type BGPPeerList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Items []BGPPeer `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type BGPPeer struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	Spec BGPPeerSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+}
 
 // BGPPeerSpec contains the specification for a BGPPeer resource.
 type BGPPeerSpec struct {

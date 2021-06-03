@@ -3,7 +3,7 @@
 package projectcalico
 
 import (
-	"github.com/projectcalico/api/pkg/apis/projectcalico/v3/calico"
+	calico "github.com/projectcalico/api/pkg/apis/projectcalico/v3"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
