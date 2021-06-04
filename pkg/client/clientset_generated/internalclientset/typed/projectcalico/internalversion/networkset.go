@@ -20,7 +20,7 @@ import (
 // NetworkSetsGetter has a method to return a NetworkSetInterface.
 // A group's client should implement this interface.
 type NetworkSetsGetter interface {
-	NetworkSets() NetworkSetInterface
+	NetworkSets(namespace string) NetworkSetInterface
 }
 
 // NetworkSetInterface has methods to work with NetworkSet resources.
@@ -39,12 +39,14 @@ type NetworkSetInterface interface {
 // networkSets implements NetworkSetInterface
 type networkSets struct {
 	client rest.Interface
+	ns     string
 }
 
 // newNetworkSets returns a NetworkSets
-func newNetworkSets(c *ProjectcalicoClient) *networkSets {
+func newNetworkSets(c *ProjectcalicoClient, namespace string) *networkSets {
 	return &networkSets{
 		client: c.RESTClient(),
+		ns:     namespace,
 	}
 }
 
@@ -52,6 +54,7 @@ func newNetworkSets(c *ProjectcalicoClient) *networkSets {
 func (c *networkSets) Get(ctx context.Context, name string, options v1.GetOptions) (result *projectcalico.NetworkSet, err error) {
 	result = &projectcalico.NetworkSet{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("networksets").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -68,6 +71,7 @@ func (c *networkSets) List(ctx context.Context, opts v1.ListOptions) (result *pr
 	}
 	result = &projectcalico.NetworkSetList{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("networksets").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -84,6 +88,7 @@ func (c *networkSets) Watch(ctx context.Context, opts v1.ListOptions) (watch.Int
 	}
 	opts.Watch = true
 	return c.client.Get().
+		Namespace(c.ns).
 		Resource("networksets").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -94,6 +99,7 @@ func (c *networkSets) Watch(ctx context.Context, opts v1.ListOptions) (watch.Int
 func (c *networkSets) Create(ctx context.Context, networkSet *projectcalico.NetworkSet, opts v1.CreateOptions) (result *projectcalico.NetworkSet, err error) {
 	result = &projectcalico.NetworkSet{}
 	err = c.client.Post().
+		Namespace(c.ns).
 		Resource("networksets").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(networkSet).
@@ -106,6 +112,7 @@ func (c *networkSets) Create(ctx context.Context, networkSet *projectcalico.Netw
 func (c *networkSets) Update(ctx context.Context, networkSet *projectcalico.NetworkSet, opts v1.UpdateOptions) (result *projectcalico.NetworkSet, err error) {
 	result = &projectcalico.NetworkSet{}
 	err = c.client.Put().
+		Namespace(c.ns).
 		Resource("networksets").
 		Name(networkSet.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
@@ -118,6 +125,7 @@ func (c *networkSets) Update(ctx context.Context, networkSet *projectcalico.Netw
 // Delete takes name of the networkSet and deletes it. Returns an error if one occurs.
 func (c *networkSets) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("networksets").
 		Name(name).
 		Body(&opts).
@@ -132,6 +140,7 @@ func (c *networkSets) DeleteCollection(ctx context.Context, opts v1.DeleteOption
 		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("networksets").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -144,6 +153,7 @@ func (c *networkSets) DeleteCollection(ctx context.Context, opts v1.DeleteOption
 func (c *networkSets) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *projectcalico.NetworkSet, err error) {
 	result = &projectcalico.NetworkSet{}
 	err = c.client.Patch(pt).
+		Namespace(c.ns).
 		Resource("networksets").
 		Name(name).
 		SubResource(subresources...).

@@ -71,8 +71,8 @@ func (c *ProjectcalicoClient) NetworkPolicies(namespace string) NetworkPolicyInt
 	return newNetworkPolicies(c, namespace)
 }
 
-func (c *ProjectcalicoClient) NetworkSets() NetworkSetInterface {
-	return newNetworkSets(c)
+func (c *ProjectcalicoClient) NetworkSets(namespace string) NetworkSetInterface {
+	return newNetworkSets(c, namespace)
 }
 
 func (c *ProjectcalicoClient) Profiles() ProfileInterface {
