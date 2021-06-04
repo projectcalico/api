@@ -7,4 +7,4 @@
 // Package v3 is the v3 version of the API.
 // +groupName=projectcalico.org
 
-package v3
+package v3 // import "github.com/projectcalico/api/pkg/apis/projectcalico/v3"

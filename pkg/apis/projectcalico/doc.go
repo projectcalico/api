@@ -4,4 +4,4 @@
 
 // Package api is the internal version of the API.
 // +groupName=projectcalico.org
-package projectcalico
+package projectcalico // import "github.com/projectcalico/api/pkg/apis/projectcalico"
