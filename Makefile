@@ -25,7 +25,7 @@ Makefile.common.$(MAKE_BRANCH):
 
 include Makefile.common
 
-build: gen-files
+build: gen-files examples
 
 ###############################################################################
 # This section contains the code generation stuff
@@ -136,6 +136,9 @@ clean-generated:
 clean-bin:
 	rm -rf $(BINDIR) \
 	    .generate_execs \
+
+.PHONY: examples
+examples: bin/list-gnp
 
 bin/list-gnp: examples/list-gnp/main.go
 	@echo Building list-gnp example binary...
