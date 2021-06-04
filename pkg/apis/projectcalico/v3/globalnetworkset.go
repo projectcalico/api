@@ -15,7 +15,6 @@
 package v3
 
 import (
-	calico "github.com/projectcalico/libcalico-go/lib/apis/v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -43,7 +42,7 @@ type GlobalNetworkSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
-	Spec calico.GlobalNetworkSetSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Spec GlobalNetworkSetSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
 }
 
 // GlobalNetworkSetSpec contains the specification for a NetworkSet resource.

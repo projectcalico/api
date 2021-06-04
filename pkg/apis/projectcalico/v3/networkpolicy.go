@@ -15,7 +15,6 @@
 package v3
 
 import (
-	"github.com/song-jiang/api/pkg/apis/projectcalico/v3/calico"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,7 +40,7 @@ type NetworkPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
-	Spec calico.NetworkPolicySpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Spec NetworkPolicySpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
 }
 
 type NetworkPolicySpec struct {
