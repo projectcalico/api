@@ -145,9 +145,26 @@ ut:
 	$(DOCKER_RUN) --privileged $(CALICO_BUILD) \
 		sh -c 'cd /go/src/$(PACKAGE_NAME) && ginkgo -r -focus="$(GINKGO_FOCUS)" $(WHAT)'
 
+## Check if generated files are out of date
+.PHONY: check-generated-files
+check-generated-files: .generate_files
+	if (git describe --tags --dirty | grep -c dirty >/dev/null); then \
+	  echo "Generated files are out of date."; \
+	  false; \
+	else \
+	  echo "Generated files are up to date."; \
+	fi
+
+###############################################################################
+# Static checks
+###############################################################################
+## Perform static checks on the code.
+# TODO: re-enable these linters !
+LINT_ARGS := --disable gosimple,govet,structcheck,errcheck,goimports,unused,ineffassign,staticcheck,deadcode,typecheck --timeout 5m
+
 ###############################################################################
 # CI
 ###############################################################################
 .PHONY: ci
 ## Run what CI runs
-ci: clean static-checks ut
+ci: clean check-generated-files static-checks ut
