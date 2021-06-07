@@ -1,0 +1,19 @@
+version: v1.0
+name: api
+execution_time_limit:
+  hours: 1
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+
+blocks:
+  - name: Build
+    dependencies: []
+    task:
+      jobs:
+        - name: Build
+          commands:
+            - checkout
+            - make ci
+

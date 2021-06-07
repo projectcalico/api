@@ -144,3 +144,10 @@ GINKGO_FOCUS?=.*
 ut:
 	$(DOCKER_RUN) --privileged $(CALICO_BUILD) \
 		sh -c 'cd /go/src/$(PACKAGE_NAME) && ginkgo -r -focus="$(GINKGO_FOCUS)" $(WHAT)'
+
+###############################################################################
+# CI
+###############################################################################
+.PHONY: ci
+## Run what CI runs
+ci: clean static-checks ut
