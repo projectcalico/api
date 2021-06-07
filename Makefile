@@ -136,3 +136,11 @@ bin/list-gnp: examples/list-gnp/main.go
 	mkdir -p bin
 	$(DOCKER_GO_BUILD) sh -c '$(GIT_CONFIG_SSH) \
 	   	go build -v -o $@ -v $(LDFLAGS) "examples/list-gnp/main.go"' 
+
+WHAT?=.
+GINKGO_FOCUS?=.*
+
+.PHONY:ut
+ut:
+	$(DOCKER_RUN) --privileged $(CALICO_BUILD) \
+		sh -c 'cd /go/src/$(PACKAGE_NAME) && ginkgo -r -focus="$(GINKGO_FOCUS)" $(WHAT)'
