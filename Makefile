@@ -69,9 +69,7 @@ gen-files .generate_files: lint-cache-dir .generate_execs clean-generated
 	   sh -c '$(GIT_CONFIG_SSH) $(BINDIR)/defaulter-gen \
 		--v 1 --logtostderr \
 		--go-header-file "/go/src/$(PACKAGE_NAME)/hack/boilerplate/boilerplate.go.txt" \
-		--input-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico" \
 		--input-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico/v3" \
-		--extra-peer-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico" \
 		--extra-peer-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico/v3" \
 		--output-file-base "zz_generated.defaults"'
 	# Generate deep copies
@@ -79,21 +77,14 @@ gen-files .generate_files: lint-cache-dir .generate_execs clean-generated
 	   sh -c '$(GIT_CONFIG_SSH) $(BINDIR)/deepcopy-gen \
 		--v 1 --logtostderr \
 		--go-header-file "/go/src/$(PACKAGE_NAME)/hack/boilerplate/boilerplate.go.txt" \
-		--input-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico" \
 		--input-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico/v3" \
 		--bounding-dirs $(PACKAGE_NAME) \
 		--output-file-base zz_generated.deepcopy'
-	# Generate conversions
-	$(DOCKER_RUN) $(CALICO_BUILD) \
-	   sh -c '$(GIT_CONFIG_SSH) $(BINDIR)/conversion-gen \
-		--v 1 --logtostderr \
-		--go-header-file "/go/src/$(PACKAGE_NAME)/hack/boilerplate/boilerplate.go.txt" \
-		--input-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico" \
-		--input-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico/v3" \
-		--output-file-base zz_generated.conversion'
+
 	# generate all pkg/client contents
 	$(DOCKER_RUN) $(CALICO_BUILD) \
 	   sh -c '$(GIT_CONFIG_SSH) $(BUILD_DIR)/update-client-gen.sh'
+
 	# generate openapi
 	$(DOCKER_RUN) $(CALICO_BUILD) \
 	   sh -c '$(GIT_CONFIG_SSH) $(BINDIR)/openapi-gen \
