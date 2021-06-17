@@ -59,6 +59,10 @@ func (c *FakeProjectcalicoV3) NetworkSets(namespace string) v3.NetworkSetInterfa
 	return &FakeNetworkSets{c, namespace}
 }
 
+func (c *FakeProjectcalicoV3) NodeBGPStatuses() v3.NodeBGPStatusInterface {
+	return &FakeNodeBGPStatuses{c}
+}
+
 func (c *FakeProjectcalicoV3) Profiles() v3.ProfileInterface {
 	return &FakeProfiles{c}
 }

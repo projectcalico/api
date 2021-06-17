@@ -32,6 +32,8 @@ type Interface interface {
 	NetworkPolicies() NetworkPolicyInformer
 	// NetworkSets returns a NetworkSetInformer.
 	NetworkSets() NetworkSetInformer
+	// NodeBGPStatuses returns a NodeBGPStatusInformer.
+	NodeBGPStatuses() NodeBGPStatusInformer
 	// Profiles returns a ProfileInformer.
 	Profiles() ProfileInformer
 }
@@ -100,6 +102,11 @@ func (v *version) NetworkPolicies() NetworkPolicyInformer {
 // NetworkSets returns a NetworkSetInformer.
 func (v *version) NetworkSets() NetworkSetInformer {
 	return &networkSetInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// NodeBGPStatuses returns a NodeBGPStatusInformer.
+func (v *version) NodeBGPStatuses() NodeBGPStatusInformer {
+	return &nodeBGPStatusInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
 // Profiles returns a ProfileInformer.
