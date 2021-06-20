@@ -144,7 +144,7 @@ clean-bin:
 	    .generate_execs \
 
 .PHONY: examples
-examples: bin/list-gnp
+examples: bin/list-gnp bin/bgp-status
 
 bin/list-gnp: examples/list-gnp/main.go
 	@echo Building list-gnp example binary...
@@ -152,6 +152,11 @@ bin/list-gnp: examples/list-gnp/main.go
 	$(DOCKER_GO_BUILD) sh -c '$(GIT_CONFIG_SSH) \
 	   	go build -v -o $@ -v $(LDFLAGS) "examples/list-gnp/main.go"' 
 
+bin/bgp-status: examples/bgp-status/main.go
+	@echo Building bgp-status example binary...
+	mkdir -p bin
+	$(DOCKER_GO_BUILD) sh -c '$(GIT_CONFIG_SSH) \
+	   	go build -v -o $@ -v $(LDFLAGS) "examples/bgp-status/main.go"' 
 WHAT?=.
 GINKGO_FOCUS?=.*
 
