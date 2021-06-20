@@ -44,7 +44,6 @@ build: gen-files gen-crds examples
 gen-crds: bin/controller-gen
 	rm -rf config
 	$(DOCKER_RUN) $(CALICO_BUILD) sh -c './bin/controller-gen  crd:crdVersions=v1 paths=./pkg/apis/... output:crd:dir=config/crd/'
-	patch -s -p0 < ./config.patch
 
 # Used for generating CRD files.
 $(BINDIR)/controller-gen:
