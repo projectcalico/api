@@ -23,6 +23,8 @@ const (
 	KindNodeBGPStatusList = "NodeBGPStatusList"
 )
 
+// +kubebuilder:object:root=true
+
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -34,16 +36,20 @@ type NodeBGPStatusList struct {
 	Items []NodeBGPStatus `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
+// +kubebuilder:object:root=true
+
 // +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Cluster
 
 type NodeBGPStatus struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
 	Spec   NodeBGPStatusSpec   `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
-	Status NodeBGPStatusStatus `json:"spec,omitempty" protobuf:"bytes,3,opt,name=status"`
+	Status NodeBGPStatusStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
 }
 
 // NodeBGPStatusSpec defines the desired state of NodeBGPStatus

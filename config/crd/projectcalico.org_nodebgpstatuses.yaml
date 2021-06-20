@@ -14,7 +14,7 @@ spec:
     listKind: NodeBGPStatusList
     plural: nodebgpstatuses
     singular: nodebgpstatus
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v3
     schema:
@@ -33,6 +33,9 @@ spec:
           metadata:
             type: object
           spec:
+            description: NodeBGPStatusSpec defines the desired state of NodeBGPStatus
+            type: object
+          status:
             description: NodeBGPStatusStatus defines the observed state of NodeBGPStatus
             properties:
               conditions:
@@ -71,6 +74,8 @@ spec:
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""

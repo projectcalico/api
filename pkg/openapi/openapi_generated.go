@@ -3146,7 +3146,7 @@ func schema_pkg_apis_projectcalico_v3_NodeBGPStatus(ref common.ReferenceCallback
 							Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusSpec"),
 						},
 					},
-					"spec": {
+					"status": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
 							Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusStatus"),
