@@ -88,6 +88,8 @@ type EndpointPort struct {
 	Name     string               `json:"name" validate:"portName"`
 	Protocol numorstring.Protocol `json:"protocol"`
 	Port     uint16               `json:"port" validate:"gt=0"`
+	HostPort uint16               `json:"hostPort"`
+	HostIP   string               `json:"hostIP"`
 }
 
 // NewHostEndpoint creates a new (zeroed) HostEndpoint struct with the TypeMetadata initialised to the current
