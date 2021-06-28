@@ -50,54 +50,109 @@ func main() {
 		panic(err)
 	}
 
-	condition := apiv3.NodeBGPStatusCondition{
-		PeerIP: "172.16.101.23",
-		Type:   "node-to-node-mesh",
-		State:  "up",
-		Since:  "09:29:58",
-		Info:   "Established",
+	conditions := []apiv3.NodeBGPStatusCondition{
+		{
+			PeerIP: "172.16.101.23",
+			Type:   "node-to-node-mesh",
+			State:  "up",
+			Since:  "09:29:58",
+			Info:   "Established",
+		},
+		{
+			PeerIP: "172.16.101.24",
+			Type:   "node-to-node-mesh",
+			State:  "up",
+			Since:  "09:29:59",
+			Info:   "Established",
+		},
+		{
+			PeerIP: "172.16.101.25",
+			Type:   "node-to-node-mesh",
+			State:  "up",
+			Since:  "09:30:00",
+			Info:   "Established",
+		},
+		{
+			PeerIP: "172.16.101.26",
+			Type:   "node-to-node-mesh",
+			State:  "up",
+			Since:  "09:30:01",
+			Info:   "Established",
+		},
 	}
 
+	labels1 := map[string]string{
+		"node":        "work-node-1",
+		"bgpPeerName": "rack-1",
+		"peerIP":      "172.18.0.1",
+		"ASNumber":    "65310",
+	}
+
+	labels2 := map[string]string{
+		"node":        "work-node-2",
+		"bgpPeerName": "rack-1",
+		"peerIP":      "172.18.0.2",
+		"ASNumber":    "65310",
+	}
+
+	err = CreateMockNode(cs, "mock-bgp-0", labels1, conditions)
+	if err != nil {
+		panic(err)
+	}
+
+	err = CreateMockNode(cs, "mock-bgp-1", labels2, conditions)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func CreateMockNode(cs *clientset.Clientset, name string, labels map[string]string, conditions []apiv3.NodeBGPStatusCondition) error {
 	typeMeta := metav1.TypeMeta{Kind: "NodeBGPStatus", APIVersion: "projectcalico.org/v3"}
 
 	status := &apiv3.NodeBGPStatus{
 		TypeMeta: typeMeta,
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "mock-node",
-			Labels: map[string]string{},
+			Name:   name,
+			Labels: labels,
 		},
 		Spec: apiv3.NodeBGPStatusSpec{},
 	}
 
-	_, err = cs.ProjectcalicoV3().NodeBGPStatuses().Create(context.Background(), status, metav1.CreateOptions{})
+	_, err := cs.ProjectcalicoV3().NodeBGPStatuses().Create(context.Background(), status, metav1.CreateOptions{})
 	if err != nil {
 		panic(err)
 	}
 
-	// List NodeBGPStatus.
-	list, err := cs.ProjectcalicoV3().NodeBGPStatuses().List(context.Background(), metav1.ListOptions{})
+	newStatus, err := cs.ProjectcalicoV3().NodeBGPStatuses().Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
-		panic(err)
-	}
-
-	for _, bgp := range list.Items {
-		fmt.Printf("%#v\n", bgp)
-	}
-
-	newStatus, err := cs.ProjectcalicoV3().NodeBGPStatuses().Get(context.Background(), "mock-node", metav1.GetOptions{})
-	if err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Printf("%#v\n", newStatus)
 
 	newStatus.TypeMeta = typeMeta
 	newStatus.Status = apiv3.NodeBGPStatusStatus{
-		Conditions: []apiv3.NodeBGPStatusCondition{condition},
+		Conditions: conditions,
 	}
 
 	_, err = cs.ProjectcalicoV3().NodeBGPStatuses().UpdateStatus(context.Background(), newStatus, metav1.UpdateOptions{})
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
+}
+
+func ListStatus(cs *clientset.Clientset) error {
+	// List NodeBGPStatus.
+	list, err := cs.ProjectcalicoV3().NodeBGPStatuses().List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, bgp := range list.Items {
+		fmt.Printf("%#v\n", bgp)
+	}
+
+	return nil
 }
