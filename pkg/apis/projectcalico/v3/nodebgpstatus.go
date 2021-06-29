@@ -48,16 +48,17 @@ type NodeBGPStatus struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
-	Spec   NodeBGPStatusSpec   `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
 	Status NodeBGPStatusStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
-}
-
-// NodeBGPStatusSpec defines the desired state of NodeBGPStatus
-type NodeBGPStatusSpec struct {
 }
 
 // NodeBGPStatusStatus defines the observed state of NodeBGPStatus
 type NodeBGPStatusStatus struct {
+	// The total number of established bgp sessions.
+	NumEstablished int `json:"numEstablished,omitempty"`
+
+	// The total number of non-established bgp sessions.
+	NumNonEstablished int `json:"numNoEstablished,omitempty"`
+
 	// Conditions represents the latest observed set of conditions for this component. A component may be one or more of
 	// Available, Progressing, or Degraded.
 	Conditions []NodeBGPStatusCondition `json:"conditions"`
@@ -100,3 +101,11 @@ func NewNodeBGPStatus() *NodeBGPStatus {
 		},
 	}
 }
+
+type BGPStatusType string
+
+const (
+	BGPStatusTypeNodeMesh   BGPStatusType = "NodeMesh"
+	BGPStatusTypeNodePeer                 = "NodePeer"
+	BGPStatusTypeGlobalPeer               = "GlobalPeer"
+)

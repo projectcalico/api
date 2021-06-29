@@ -32,9 +32,6 @@ spec:
             type: string
           metadata:
             type: object
-          spec:
-            description: NodeBGPStatusSpec defines the desired state of NodeBGPStatus
-            type: object
           status:
             description: NodeBGPStatusStatus defines the observed state of NodeBGPStatus
             properties:
@@ -68,6 +65,12 @@ spec:
                       type: string
                   type: object
                 type: array
+              numEstablished:
+                description: The total number of established bgp sessions.
+                type: integer
+              numNoEstablished:
+                description: The total number of non-established bgp sessions.
+                type: integer
             required:
             - conditions
             type: object

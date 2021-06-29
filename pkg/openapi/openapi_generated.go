@@ -65,7 +65,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatus":                      schema_pkg_apis_projectcalico_v3_NodeBGPStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusCondition":             schema_pkg_apis_projectcalico_v3_NodeBGPStatusCondition(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusList":                  schema_pkg_apis_projectcalico_v3_NodeBGPStatusList(ref),
-		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusSpec":                  schema_pkg_apis_projectcalico_v3_NodeBGPStatusSpec(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusStatus":                schema_pkg_apis_projectcalico_v3_NodeBGPStatusStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeControllerConfig":               schema_pkg_apis_projectcalico_v3_NodeControllerConfig(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.PolicyControllerConfig":             schema_pkg_apis_projectcalico_v3_PolicyControllerConfig(ref),
@@ -3140,12 +3139,6 @@ func schema_pkg_apis_projectcalico_v3_NodeBGPStatus(ref common.ReferenceCallback
 							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
 						},
 					},
-					"spec": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusSpec"),
-						},
-					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
@@ -3156,7 +3149,7 @@ func schema_pkg_apis_projectcalico_v3_NodeBGPStatus(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusSpec", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -3257,17 +3250,6 @@ func schema_pkg_apis_projectcalico_v3_NodeBGPStatusList(ref common.ReferenceCall
 	}
 }
 
-func schema_pkg_apis_projectcalico_v3_NodeBGPStatusSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "NodeBGPStatusSpec defines the desired state of NodeBGPStatus",
-				Type:        []string{"object"},
-			},
-		},
-	}
-}
-
 func schema_pkg_apis_projectcalico_v3_NodeBGPStatusStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -3275,6 +3257,20 @@ func schema_pkg_apis_projectcalico_v3_NodeBGPStatusStatus(ref common.ReferenceCa
 				Description: "NodeBGPStatusStatus defines the observed state of NodeBGPStatus",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"numEstablished": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The total number of established bgp sessions.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"numNoEstablished": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The total number of non-established bgp sessions.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 					"conditions": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Conditions represents the latest observed set of conditions for this component. A component may be one or more of Available, Progressing, or Degraded.",

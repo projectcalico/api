@@ -115,7 +115,6 @@ func CreateMockNode(cs *clientset.Clientset, name string, labels map[string]stri
 			Name:   name,
 			Labels: labels,
 		},
-		Spec: apiv3.NodeBGPStatusSpec{},
 	}
 
 	_, err := cs.ProjectcalicoV3().NodeBGPStatuses().Create(context.Background(), status, metav1.CreateOptions{})
