@@ -3655,19 +3655,18 @@ func schema_pkg_apis_projectcalico_v3_ServiceMatch(ref common.ReferenceCallback)
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"names": {
+					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name specifies the name of a Kubernetes Service to match.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace specifies the namespace of the given Service. If left empty, the rule will match within this policy's namespace.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},
