@@ -26,4 +26,6 @@ type NetworkPolicyExpansion interface{}
 
 type NetworkSetExpansion interface{}
 
+type NodeBGPStatusExpansion interface{}
+
 type ProfileExpansion interface{}
