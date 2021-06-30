@@ -8,6 +8,12 @@ BINDIR ?= bin
 BUILD_DIR ?= build
 TOP_SRC_DIRS = pkg
 
+ORGANIZATION=projectcalico
+SEMAPHORE_PROJECT_ID?=$(SEMAPHORE_API_PROJECT_ID)
+
+# Used so semaphore can trigger the update pin pipelines in projects that have this project as a dependency.
+SEMAPHORE_AUTO_PIN_UPDATE_PROJECT_IDS=$(SEMAPHORE_LIBCALICO_GO_PROJECT_ID)
+
 ##############################################################################
 # Download and include Makefile.common before anything else
 #   Additions to EXTRA_DOCKER_ARGS need to happen before the include since
@@ -25,7 +31,7 @@ Makefile.common.$(MAKE_BRANCH):
 
 include Makefile.common
 
-build: gen-files gen-crds examples
+build: gen-files examples
 
 ###############################################################################
 # This section contains the code generation stuff
@@ -39,20 +45,6 @@ build: gen-files gen-crds examples
 	$(BINDIR)/informer-gen \
 	$(BINDIR)/openapi-gen
 	touch $@
-
-## Force a rebuild of custom resource definition yamls
-gen-crds: bin/controller-gen
-	rm -rf config
-	$(DOCKER_RUN) $(CALICO_BUILD) sh -c './bin/controller-gen  crd:crdVersions=v1 paths=./pkg/apis/... output:crd:dir=config/crd/'
-
-# Used for generating CRD files.
-$(BINDIR)/controller-gen:
-	# Download a version of controller-gen that has been hacked to support additional types (e.g., float).
-	# We can remove this once we update the Calico v3 APIs to use only types which are supported by the upstream controller-gen
-	# tooling. Example: float, all the types in the numorstring package, etc.
-	mkdir -p bin
-	wget -O $@ https://github.com/projectcalico/controller-tools/releases/download/calico/controller-gen && chmod +x $@
-
 
 $(BINDIR)/deepcopy-gen:
 	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/$(PACKAGE_NAME)/$(BINDIR) go install k8s.io/code-generator/cmd/deepcopy-gen"
@@ -143,7 +135,7 @@ clean-bin:
 	    .generate_execs \
 
 .PHONY: examples
-examples: bin/list-gnp bin/bgp-status
+examples: bin/list-gnp
 
 bin/list-gnp: examples/list-gnp/main.go
 	@echo Building list-gnp example binary...
@@ -151,11 +143,6 @@ bin/list-gnp: examples/list-gnp/main.go
 	$(DOCKER_GO_BUILD) sh -c '$(GIT_CONFIG_SSH) \
 	   	go build -v -o $@ -v $(LDFLAGS) "examples/list-gnp/main.go"' 
 
-bin/bgp-status: examples/bgp-status/main.go
-	@echo Building bgp-status example binary...
-	mkdir -p bin
-	$(DOCKER_GO_BUILD) sh -c '$(GIT_CONFIG_SSH) \
-	   	go build -v -o $@ -v $(LDFLAGS) "examples/bgp-status/main.go"' 
 WHAT?=.
 GINKGO_FOCUS?=.*
 
