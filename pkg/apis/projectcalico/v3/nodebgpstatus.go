@@ -57,7 +57,7 @@ type NodeBGPStatusStatus struct {
 	NumEstablished int `json:"numEstablished,omitempty"`
 
 	// The total number of non-established bgp sessions.
-	NumNonEstablished int `json:"numNoEstablished,omitempty"`
+	NumNotEstablished int `json:"numNotEstablished,omitempty"`
 
 	// Conditions represents the latest observed set of conditions for this component. A component may be one or more of
 	// Available, Progressing, or Degraded.
