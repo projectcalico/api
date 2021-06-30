@@ -24,6 +24,7 @@ type ProjectcalicoV3Interface interface {
 	KubeControllersConfigurationsGetter
 	NetworkPoliciesGetter
 	NetworkSetsGetter
+	NodeBGPStatusesGetter
 	ProfilesGetter
 }
 
@@ -74,6 +75,10 @@ func (c *ProjectcalicoV3Client) NetworkPolicies(namespace string) NetworkPolicyI
 
 func (c *ProjectcalicoV3Client) NetworkSets(namespace string) NetworkSetInterface {
 	return newNetworkSets(c, namespace)
+}
+
+func (c *ProjectcalicoV3Client) NodeBGPStatuses() NodeBGPStatusInterface {
+	return newNodeBGPStatuses(c)
 }
 
 func (c *ProjectcalicoV3Client) Profiles() ProfileInterface {
