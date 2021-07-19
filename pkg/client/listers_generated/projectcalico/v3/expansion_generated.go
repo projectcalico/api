@@ -56,6 +56,10 @@ type NetworkSetListerExpansion interface{}
 // NetworkSetNamespaceLister.
 type NetworkSetNamespaceListerExpansion interface{}
 
+// NodeBGPStatusListerExpansion allows custom methods to be added to
+// NodeBGPStatusLister.
+type NodeBGPStatusListerExpansion interface{}
+
 // ProfileListerExpansion allows custom methods to be added to
 // ProfileLister.
 type ProfileListerExpansion interface{}
