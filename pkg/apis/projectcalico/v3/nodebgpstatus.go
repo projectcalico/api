@@ -53,15 +53,14 @@ type NodeBGPStatusStatus struct {
 	// The total number of non-established bgp sessions.
 	NumNotEstablished int `json:"numNotEstablished,omitempty"`
 
-	// Conditions represents the latest observed set of conditions for this component. A component may be one or more of
-	// Available, Progressing, or Degraded.
+	// Conditions represents the latest observed set of conditions for this component.
 	Conditions []NodeBGPStatusCondition `json:"conditions"`
 }
 
 // NodeBGPStatusCondition contains the status for a NodeBGPStatus resource.
 // +k8s:deepcopy-gen=true
 type NodeBGPStatusCondition struct {
-	// The IP address of the peer followed by an optional port number to peer with.
+	// IP address of the peer whose condition we are reporting.
 	// If port number is given, format should be `[<IPv6>]:port` or `<IPv4>:<port>` for IPv4.
 	// If optional port number is not set, and this peer IP and ASNumber belongs to a calico/node
 	// with ListenPort set in BGPConfiguration, then we use that port to peer.
@@ -70,19 +69,19 @@ type NodeBGPStatusCondition struct {
 
 	// The type is type of bgp session state.
 	// +optional
-	Type BGPStatusType `json:"type,omitempty"`
+	Type BGPPeerType `json:"type,omitempty"`
 
 	// The state is the bgp session state.
 	// +optional
 	State string `json:"state,omitempty"`
 
-	// The Since is the bgp session since.
+	// Since is the time since the condition last changed.
 	// +optional
 	Since string `json:"since,omitempty"`
 
-	// The Info is the bgp session info.
+	// The reason it's in the current state.
 	// +optional
-	Info string `json:"info,omitempty"`
+	Reason string `json:"info,omitempty"`
 }
 
 // NewNodeBGPStatus creates a new (zeroed) NodeBGPStatus struct with the TypeMetadata initialised to the current
@@ -96,10 +95,10 @@ func NewNodeBGPStatus() *NodeBGPStatus {
 	}
 }
 
-type BGPStatusType string
+type BGPPeerType string
 
 const (
-	BGPStatusTypeNodeMesh   BGPStatusType = "NodeMesh"
-	BGPStatusTypeNodePeer                 = "NodePeer"
-	BGPStatusTypeGlobalPeer               = "GlobalPeer"
+	BGPPeerTypeNodeMesh   BGPPeerType = "NodeMesh"
+	BGPPeerTypeNodePeer               = "NodePeer"
+	BGPPeerTypeGlobalPeer             = "GlobalPeer"
 )
