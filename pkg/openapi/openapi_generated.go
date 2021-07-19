@@ -3191,7 +3191,7 @@ func schema_pkg_apis_projectcalico_v3_NodeBGPStatusCondition(ref common.Referenc
 				Properties: map[string]spec.Schema{
 					"peerIP": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The IP address of the peer followed by an optional port number to peer with. If port number is given, format should be `[<IPv6>]:port` or `<IPv4>:<port>` for IPv4. If optional port number is not set, and this peer IP and ASNumber belongs to a calico/node with ListenPort set in BGPConfiguration, then we use that port to peer.",
+							Description: "IP address of the peer whose condition we are reporting. If port number is given, format should be `[<IPv6>]:port` or `<IPv4>:<port>` for IPv4. If optional port number is not set, and this peer IP and ASNumber belongs to a calico/node with ListenPort set in BGPConfiguration, then we use that port to peer.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3212,14 +3212,14 @@ func schema_pkg_apis_projectcalico_v3_NodeBGPStatusCondition(ref common.Referenc
 					},
 					"since": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The Since is the bgp session since.",
+							Description: "Since is the time since the condition last changed.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"info": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The Info is the bgp session info.",
+							Description: "The reason it's in the current state.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3302,7 +3302,7 @@ func schema_pkg_apis_projectcalico_v3_NodeBGPStatusStatus(ref common.ReferenceCa
 					},
 					"conditions": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Conditions represents the latest observed set of conditions for this component. A component may be one or more of Available, Progressing, or Degraded.",
+							Description: "Conditions represents the latest observed set of conditions for this component.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
