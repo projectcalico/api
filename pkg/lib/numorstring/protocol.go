@@ -133,3 +133,7 @@ func (p Protocol) SupportsPorts() bool {
 		return false
 	}
 }
+
+// Override the OpenAPI definition for Protocol.
+func (_ Protocol) OpenAPISchemaType() []string { return []string{"string"} }
+func (_ Protocol) OpenAPISchemaFormat() string { return "int-or-string" }
