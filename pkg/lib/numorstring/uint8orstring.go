@@ -78,3 +78,7 @@ func (i Uint8OrString) NumValue() (uint8, error) {
 	}
 	return i.NumVal, nil
 }
+
+// Override the OpenAPI definition for Uint8OrString.
+func (_ Uint8OrString) OpenAPISchemaType() []string { return []string{"string"} }
+func (_ Uint8OrString) OpenAPISchemaFormat() string { return "int-or-string" }

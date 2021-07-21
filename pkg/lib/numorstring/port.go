@@ -142,3 +142,7 @@ func (p Port) String() string {
 		return fmt.Sprintf("%d:%d", p.MinPort, p.MaxPort)
 	}
 }
+
+// Override the OpenAPI definition for Port.
+func (_ Port) OpenAPISchemaType() []string { return []string{"string"} }
+func (_ Port) OpenAPISchemaFormat() string { return "int-or-string" }
