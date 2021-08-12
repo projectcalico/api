@@ -64,6 +64,10 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NetworkSet":                         schema_pkg_apis_projectcalico_v3_NetworkSet(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NetworkSetList":                     schema_pkg_apis_projectcalico_v3_NetworkSetList(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NetworkSetSpec":                     schema_pkg_apis_projectcalico_v3_NetworkSetSpec(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatus":                      schema_pkg_apis_projectcalico_v3_NodeBGPStatus(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusCondition":             schema_pkg_apis_projectcalico_v3_NodeBGPStatusCondition(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusList":                  schema_pkg_apis_projectcalico_v3_NodeBGPStatusList(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusStatus":                schema_pkg_apis_projectcalico_v3_NodeBGPStatusStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeControllerConfig":               schema_pkg_apis_projectcalico_v3_NodeControllerConfig(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.PolicyControllerConfig":             schema_pkg_apis_projectcalico_v3_PolicyControllerConfig(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.PrefixAdvertisement":                schema_pkg_apis_projectcalico_v3_PrefixAdvertisement(ref),
@@ -3135,6 +3139,187 @@ func schema_pkg_apis_projectcalico_v3_NetworkSetSpec(ref common.ReferenceCallbac
 				},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_projectcalico_v3_NodeBGPStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_projectcalico_v3_NodeBGPStatusCondition(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NodeBGPStatusCondition contains the status for a NodeBGPStatus resource.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"peerIP": {
+						SchemaProps: spec.SchemaProps{
+							Description: "IP address of the peer whose condition we are reporting. If port number is given, format should be `[<IPv6>]:port` or `<IPv4>:<port>` for IPv4. If optional port number is not set, and this peer IP and ASNumber belongs to a calico/node with ListenPort set in BGPConfiguration, then we use that port to peer.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The type is type of bgp session state.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"state": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The state is the bgp session state.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"since": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Since is the time since the condition last changed.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"info": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The reason it's in the current state.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_projectcalico_v3_NodeBGPStatusList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NodeBGPStatusList is a list of NodeBGPStatus resources.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatus"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_pkg_apis_projectcalico_v3_NodeBGPStatusStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NodeBGPStatusStatus defines the observed state of NodeBGPStatus",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"numEstablished": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The total number of established bgp sessions.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"numNotEstablished": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The total number of non-established bgp sessions.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"conditions": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Conditions represents the latest observed set of conditions for this component.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusCondition"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"conditions"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeBGPStatusCondition"},
 	}
 }
 
