@@ -1,5 +1,5 @@
 PACKAGE_NAME    ?= github.com/projectcalico/api
-GO_BUILD_VER    ?= v0.53
+GO_BUILD_VER    ?= v0.55
 GOMOD_VENDOR    := false
 GIT_USE_SSH      = true
 LOCAL_CHECKS     = lint-cache-dir goimports check-copyright
@@ -38,34 +38,26 @@ build: gen-files examples
 ###############################################################################
 .generate_execs: lint-cache-dir\
 	$(BINDIR)/defaulter-gen \
-	$(BINDIR)/deepcopy-gen \
 	$(BINDIR)/conversion-gen \
 	$(BINDIR)/client-gen \
 	$(BINDIR)/lister-gen \
-	$(BINDIR)/informer-gen \
-	$(BINDIR)/openapi-gen
+	$(BINDIR)/informer-gen
 	touch $@
 
-$(BINDIR)/deepcopy-gen:
-	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/$(PACKAGE_NAME)/$(BINDIR) go install k8s.io/code-generator/cmd/deepcopy-gen"
-
 $(BINDIR)/client-gen:
-	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/$(PACKAGE_NAME)/$(BINDIR) go install k8s.io/code-generator/cmd/client-gen"
+	$(DOCKER_GO_BUILD) sh -c "cp /go/bin/client-gen /go/src/$(PACKAGE_NAME)/$(BINDIR)"
 
 $(BINDIR)/lister-gen:
-	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/$(PACKAGE_NAME)/$(BINDIR) go install k8s.io/code-generator/cmd/lister-gen"
+	$(DOCKER_GO_BUILD) sh -c "cp /go/bin/lister-gen /go/src/$(PACKAGE_NAME)/$(BINDIR)"
 
 $(BINDIR)/informer-gen:
-	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/$(PACKAGE_NAME)/$(BINDIR) go install k8s.io/code-generator/cmd/informer-gen"
+	$(DOCKER_GO_BUILD) sh -c "cp /go/bin/informer-gen /go/src/$(PACKAGE_NAME)/$(BINDIR)"
 
 $(BINDIR)/defaulter-gen:
-	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/$(PACKAGE_NAME)/$(BINDIR) go install k8s.io/code-generator/cmd/defaulter-gen"
+	$(DOCKER_GO_BUILD) sh -c "cp /go/bin/defaulter-gen /go/src/$(PACKAGE_NAME)/$(BINDIR)"
 
 $(BINDIR)/conversion-gen:
-	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/$(PACKAGE_NAME)/$(BINDIR) go install k8s.io/code-generator/cmd/conversion-gen"
-
-$(BINDIR)/openapi-gen:
-	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/$(PACKAGE_NAME)/$(BINDIR) go install k8s.io/code-generator/cmd/openapi-gen"
+	$(DOCKER_GO_BUILD) sh -c "cp /go/bin/conversion-gen /go/src/$(PACKAGE_NAME)/$(BINDIR)"
 
 # Regenerate all files if the gen exes changed or any "types.go" files changed
 .PHONY: gen-files
@@ -80,7 +72,7 @@ gen-files .generate_files: lint-cache-dir .generate_execs clean-generated
 		--output-file-base "zz_generated.defaults"'
 	# Generate deep copies
 	$(DOCKER_RUN) $(CALICO_BUILD) \
-	   sh -c '$(GIT_CONFIG_SSH) $(BINDIR)/deepcopy-gen \
+	   sh -c '$(GIT_CONFIG_SSH) deepcopy-gen \
 		--v 1 --logtostderr \
 		--go-header-file "/go/src/$(PACKAGE_NAME)/hack/boilerplate/boilerplate.go.txt" \
 		--input-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico/v3" \
@@ -93,13 +85,13 @@ gen-files .generate_files: lint-cache-dir .generate_execs clean-generated
 
 	# generate openapi
 	$(DOCKER_RUN) $(CALICO_BUILD) \
-	   sh -c '$(GIT_CONFIG_SSH) $(BINDIR)/openapi-gen \
+	   sh -c '$(GIT_CONFIG_SSH) openapi-gen \
 		--v 1 --logtostderr \
 		--go-header-file "/go/src/$(PACKAGE_NAME)/hack/boilerplate/boilerplate.go.txt" \
 		--input-dirs "$(PACKAGE_NAME)/pkg/apis/projectcalico/v3,k8s.io/api/core/v1,k8s.io/api/networking/v1,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/apimachinery/pkg/version,k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/util/intstr,$(PACKAGE_NAME)/pkg/lib/numorstring" \
 		--output-package "$(PACKAGE_NAME)/pkg/openapi"'
 	$(DOCKER_GO_BUILD) \
-           sh -c '$(BINDIR)/openapi-gen \
+           sh -c 'openapi-gen \
                 --v 1 --logtostderr \
                 --go-header-file "/go/src/$(PACKAGE_NAME)/hack/boilerplate/boilerplate.go.txt" \
                 --input-dirs "$(PACKAGE_NAME)/pkg/lib/numorstring" \
