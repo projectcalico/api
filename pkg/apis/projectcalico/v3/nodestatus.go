@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	KindNodeBGPStatus     = "CalicoNodeStatus"
-	KindNodeBGPStatusList = "CalicoNodeStatusList"
+	KindCalicoNodeStatus     = "CalicoNodeStatus"
+	KindCalicoNodeStatusList = "CalicoNodeStatusList"
 )
 
 // +genclient:nonNamespaced
@@ -152,7 +152,7 @@ type CalicoNodeRoutes struct {
 func NewCalicoNodeStatus() *CalicoNodeStatus {
 	return &CalicoNodeStatus{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       KindBGPPeer,
+			Kind:       KindCalicoNodeStatus,
 			APIVersion: GroupVersionCurrent,
 		},
 	}
