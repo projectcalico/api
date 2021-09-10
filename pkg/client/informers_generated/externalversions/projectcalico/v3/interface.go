@@ -24,6 +24,8 @@ type Interface interface {
 	GlobalNetworkSets() GlobalNetworkSetInformer
 	// HostEndpoints returns a HostEndpointInformer.
 	HostEndpoints() HostEndpointInformer
+	// IPAMBlocks returns a IPAMBlockInformer.
+	IPAMBlocks() IPAMBlockInformer
 	// IPPools returns a IPPoolInformer.
 	IPPools() IPPoolInformer
 	// KubeControllersConfigurations returns a KubeControllersConfigurationInformer.
@@ -80,6 +82,11 @@ func (v *version) GlobalNetworkSets() GlobalNetworkSetInformer {
 // HostEndpoints returns a HostEndpointInformer.
 func (v *version) HostEndpoints() HostEndpointInformer {
 	return &hostEndpointInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
+// IPAMBlocks returns a IPAMBlockInformer.
+func (v *version) IPAMBlocks() IPAMBlockInformer {
+	return &iPAMBlockInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // IPPools returns a IPPoolInformer.

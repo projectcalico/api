@@ -18,6 +18,8 @@ type GlobalNetworkSetExpansion interface{}
 
 type HostEndpointExpansion interface{}
 
+type IPAMBlockExpansion interface{}
+
 type IPPoolExpansion interface{}
 
 type KubeControllersConfigurationExpansion interface{}

@@ -28,6 +28,8 @@ var (
 		&GlobalNetworkSetList{},
 		&HostEndpoint{},
 		&HostEndpointList{},
+		&IPAMBlock{},
+		&IPAMBlockList{},
 		&IPPool{},
 		&IPPoolList{},
 		&BGPConfiguration{},
