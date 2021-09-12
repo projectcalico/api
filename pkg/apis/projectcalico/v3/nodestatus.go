@@ -68,6 +68,9 @@ type CalicoNodeStatusStatus struct {
 
 	// AdditionalInfo is a a human-readable description of the status of last update.
 	AdditionalInfo string `json:"additionalInfo,omitempty"`
+
+	// BGPStatus holds node BGP status.
+	BGPStatus CalicoNodeBGPStatus `json:"bgpStatus,omitempty"`
 }
 
 // CalicoNodeBGPStatus defines the observed state of BGP status on the node.

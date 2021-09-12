@@ -1154,11 +1154,18 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeStatusStatus(ref common.Referenc
 							Format:      "",
 						},
 					},
+					"bgpStatus": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BGPStatus holds node BGP status.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPStatus"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 

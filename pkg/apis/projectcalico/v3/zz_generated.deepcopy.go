@@ -411,6 +411,7 @@ func (in *CalicoNodeStatusSpec) DeepCopy() *CalicoNodeStatusSpec {
 func (in *CalicoNodeStatusStatus) DeepCopyInto(out *CalicoNodeStatusStatus) {
 	*out = *in
 	in.UpdateTimestamp.DeepCopyInto(&out.UpdateTimestamp)
+	in.BGPStatus.DeepCopyInto(&out.BGPStatus)
 	return
 }
 
