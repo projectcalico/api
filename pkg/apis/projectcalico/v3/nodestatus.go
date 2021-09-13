@@ -49,9 +49,9 @@ type CalicoNodeStatus struct {
 // CalicoNodeStatusSpec contains the specification for a CalicoNodeStatus resource.
 type CalicoNodeStatusSpec struct {
 	// The node name identifies the Calico node instance for node status.
-	NodeName string `json:"nodeName"`
+	NodeName string `json:"node,omitempty" validate:"required,name"`
 
-	// Classes specify type of information CalicoNodeStatus should contain.
+	// Classes specifies type of information CalicoNodeStatus should contain.
 	Classes []NodeStatusClassType `json:"classes,omitempty"`
 
 	// UpdateIntervalInSeconds is the period at which CalicoNodeStatus should be updated.
