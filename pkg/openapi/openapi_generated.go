@@ -1096,17 +1096,16 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeStatusSpec(ref common.ReferenceC
 				Description: "CalicoNodeStatusSpec contains the specification for a CalicoNodeStatus resource.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"nodeName": {
+					"node": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The node name identifies the Calico node instance for node status.",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"classes": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Classes specify type of information CalicoNodeStatus should contain.",
+							Description: "Classes specifies type of information CalicoNodeStatus should contain.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -1127,7 +1126,6 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeStatusSpec(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"nodeName"},
 			},
 		},
 	}
