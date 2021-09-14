@@ -9,10 +9,10 @@ import (
 )
 
 // GroupName is the group name use in this package
-const GroupName = "projectcalico.org"
+const GroupName = "crd.projectcalico.org"
 
 // SchemeGroupVersion is group version used to register these objects
-var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v3"}
+var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1"}
 var SchemeGroupVersionInternal = schema.GroupVersion{Group: GroupName, Version: runtime.APIVersionInternal}
 
 var (
