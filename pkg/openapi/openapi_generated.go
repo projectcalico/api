@@ -27,10 +27,12 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPPeer":                            schema_pkg_apis_projectcalico_v3_BGPPeer(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPPeerList":                        schema_pkg_apis_projectcalico_v3_BGPPeerList(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPPeerSpec":                        schema_pkg_apis_projectcalico_v3_BGPPeerSpec(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeAgentStatus":              schema_pkg_apis_projectcalico_v3_CalicoNodeAgentStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPStatus":                schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus":               schema_pkg_apis_projectcalico_v3_CalicoNodeBirdStatus(ref),
-		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeers":                    schema_pkg_apis_projectcalico_v3_CalicoNodePeers(ref),
-		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoutes":                   schema_pkg_apis_projectcalico_v3_CalicoNodeRoutes(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeer":                     schema_pkg_apis_projectcalico_v3_CalicoNodePeer(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute":                    schema_pkg_apis_projectcalico_v3_CalicoNodeRoute(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRouteStatus":              schema_pkg_apis_projectcalico_v3_CalicoNodeRouteStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeStatus":                   schema_pkg_apis_projectcalico_v3_CalicoNodeStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeStatusList":               schema_pkg_apis_projectcalico_v3_CalicoNodeStatusList(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeStatusSpec":               schema_pkg_apis_projectcalico_v3_CalicoNodeStatusSpec(ref),
@@ -786,6 +788,35 @@ func schema_pkg_apis_projectcalico_v3_BGPPeerSpec(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_pkg_apis_projectcalico_v3_CalicoNodeAgentStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CalicoNodeAgentStatus defines the observed state of agent status on the node.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"bird4": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Bird4 represents the latest observed status of bird4.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus"),
+						},
+					},
+					"bird6": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Bird6 represents the latest observed status of bird6.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus"},
+	}
+}
+
 func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -807,36 +838,29 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref common.ReferenceCa
 							Format:      "int32",
 						},
 					},
-					"birdStatus": {
+					"v4Peers": {
 						SchemaProps: spec.SchemaProps{
-							Description: "BirdStatus represents the latest observed status of bird.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus"),
-						},
-					},
-					"peers": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Peers represents BGP peers status on the node.",
+							Description: "V4Peers represents IPv4 BGP peers status on the node.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeers"),
+										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeer"),
 									},
 								},
 							},
 						},
 					},
-					"routes": {
+					"v6Peers": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Routes represents routes on the node.",
+							Description: "V6Peers represents IPv6 BGP peers status on the node.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoutes"),
+										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeer"),
 									},
 								},
 							},
@@ -846,7 +870,7 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeers", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoutes"},
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeer"},
 	}
 }
 
@@ -905,11 +929,11 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBirdStatus(ref common.ReferenceC
 	}
 }
 
-func schema_pkg_apis_projectcalico_v3_CalicoNodePeers(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_projectcalico_v3_CalicoNodePeer(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "CalicoNodePeers contains the status of BGP peers on the node.",
+				Description: "CalicoNodePeer contains the status of BGP peers on the node.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"peerIP": {
@@ -940,7 +964,7 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodePeers(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
-					"info": {
+					"reason": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The reason it's in the current state.",
 							Type:        []string{"string"},
@@ -953,11 +977,11 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodePeers(ref common.ReferenceCallba
 	}
 }
 
-func schema_pkg_apis_projectcalico_v3_CalicoNodeRoutes(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_projectcalico_v3_CalicoNodeRoute(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "CalicoNodePeers contains the status of BGP routes on the node.",
+				Description: "CalicoNodeRoute contains the status of BGP routes on the node.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"destination": {
@@ -981,9 +1005,9 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeRoutes(ref common.ReferenceCallb
 							Format:      "",
 						},
 					},
-					"installedBy": {
+					"learnedFrom": {
 						SchemaProps: spec.SchemaProps{
-							Description: "InstalledBy indicates who installed this route. If it is populated by a BGP peer, this is the name of the BGPPeer object. If it is populated by node mesh, this is the name of the node.",
+							Description: "LearnedFrom indicates who installed this route. If it is populated by a BGP peer, this is the name of the BGPPeer object. If it is populated by node mesh, this is the name of the node. Or it is one of kernel, direct or static.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -991,6 +1015,49 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeRoutes(ref common.ReferenceCallb
 				},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_projectcalico_v3_CalicoNodeRouteStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CalicoNodeRouteStatus defines the observed state of routes status on the node.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"bird4": {
+						SchemaProps: spec.SchemaProps{
+							Description: "V4 represents IPv4 routes on the node.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute"),
+									},
+								},
+							},
+						},
+					},
+					"bird6": {
+						SchemaProps: spec.SchemaProps{
+							Description: "V6 represents IPv6 routes on the node.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute"},
 	}
 }
 
@@ -1138,9 +1205,9 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeStatusStatus(ref common.Referenc
 				Description: "CalicoNodeStatusStatus defines the observed state of CalicoNodeStatus. No validation needed for status since it is updated by Calico.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"updateTimestamp": {
+					"lastUpdated": {
 						SchemaProps: spec.SchemaProps{
-							Description: "UpdateTimestamp is a timestamp representing the server time when CalicoNodeStatus object last updated. It is represented in RFC3339 form and is in UTC.",
+							Description: "LastUpdated is a timestamp representing the server time when CalicoNodeStatus object last updated. It is represented in RFC3339 form and is in UTC.",
 							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
@@ -1152,18 +1219,32 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeStatusStatus(ref common.Referenc
 							Format:      "",
 						},
 					},
-					"bgpStatus": {
+					"agent": {
 						SchemaProps: spec.SchemaProps{
-							Description: "BGPStatus holds node BGP status.",
+							Description: "Agent holds agent status on the node.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeAgentStatus"),
+						},
+					},
+					"bgp": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BGP holds node BGP status.",
 							Default:     map[string]interface{}{},
 							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPStatus"),
+						},
+					},
+					"route": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Route represents routes on the node.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRouteStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeAgentStatus", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPStatus", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRouteStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 

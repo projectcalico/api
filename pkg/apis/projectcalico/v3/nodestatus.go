@@ -62,15 +62,30 @@ type CalicoNodeStatusSpec struct {
 // CalicoNodeStatusStatus defines the observed state of CalicoNodeStatus.
 // No validation needed for status since it is updated by Calico.
 type CalicoNodeStatusStatus struct {
-	// UpdateTimestamp is a timestamp representing the server time when CalicoNodeStatus object
+	// LastUpdated is a timestamp representing the server time when CalicoNodeStatus object
 	// last updated. It is represented in RFC3339 form and is in UTC.
-	UpdateTimestamp metav1.Time `json:"updateTimestamp,omitempty"`
+	LastUpdated metav1.Time `json:"lastUpdated,omitempty"`
 
 	// AdditionalInfo is a a human-readable description of the status of last update.
 	AdditionalInfo string `json:"additionalInfo,omitempty"`
 
-	// BGPStatus holds node BGP status.
-	BGPStatus CalicoNodeBGPStatus `json:"bgpStatus,omitempty"`
+	// Agent holds agent status on the node.
+	Agent CalicoNodeAgentStatus `json:"agent,omitempty"`
+
+	// BGP holds node BGP status.
+	BGP CalicoNodeBGPStatus `json:"bgp,omitempty"`
+
+	// Route represents routes on the node.
+	Route CalicoNodeRouteStatus `json:"route,omitempty"`
+}
+
+// CalicoNodeAgentStatus defines the observed state of agent status on the node.
+type CalicoNodeAgentStatus struct {
+	// Bird4 represents the latest observed status of bird4.
+	Bird4 CalicoNodeBirdStatus `json:"bird4,omitempty"`
+
+	// Bird6 represents the latest observed status of bird6.
+	Bird6 CalicoNodeBirdStatus `json:"bird6,omitempty"`
 }
 
 // CalicoNodeBGPStatus defines the observed state of BGP status on the node.
@@ -81,14 +96,20 @@ type CalicoNodeBGPStatus struct {
 	// The total number of non-established bgp sessions.
 	NumNotEstablished int `json:"numNotEstablished,omitempty"`
 
-	// BirdStatus represents the latest observed status of bird.
-	BirdStatus CalicoNodeBirdStatus `json:"birdStatus,omitempty"`
+	// V4Peers represents IPv4 BGP peers status on the node.
+	V4Peers []CalicoNodePeer `json:"v4Peers,omitempty"`
 
-	// Peers represents BGP peers status on the node.
-	Peers []CalicoNodePeers `json:"peers,omitempty"`
+	// V6Peers represents IPv6 BGP peers status on the node.
+	V6Peers []CalicoNodePeer `json:"v6Peers,omitempty"`
+}
 
-	// Routes represents routes on the node.
-	Routes []CalicoNodeRoutes `json:"routes,omitempty"`
+// CalicoNodeRouteStatus defines the observed state of routes status on the node.
+type CalicoNodeRouteStatus struct {
+	// V4 represents IPv4 routes on the node.
+	V4 []CalicoNodeRoute `json:"bird4,omitempty"`
+
+	// V6 represents IPv6 routes on the node.
+	V6 []CalicoNodeRoute `json:"bird6,omitempty"`
 }
 
 // CalicoNodeBirdStatus defines the observed state of bird.
@@ -112,8 +133,8 @@ type CalicoNodeBirdStatus struct {
 	LastReconfigTime string `json:"lastReconfigTime,omitempty"`
 }
 
-// CalicoNodePeers contains the status of BGP peers on the node.
-type CalicoNodePeers struct {
+// CalicoNodePeer contains the status of BGP peers on the node.
+type CalicoNodePeer struct {
 	// IP address of the peer whose condition we are reporting.
 	// If port number is given, format should be `[<IPv6>]:port` or `<IPv4>:<port>` for IPv4.
 	// If optional port number is not set, and this peer IP and ASNumber belongs to a calico/node
@@ -130,11 +151,11 @@ type CalicoNodePeers struct {
 	Since string `json:"since,omitempty"`
 
 	// The reason it's in the current state.
-	Reason string `json:"info,omitempty"`
+	Reason string `json:"reason,omitempty"`
 }
 
-// CalicoNodePeers contains the status of BGP routes on the node.
-type CalicoNodeRoutes struct {
+// CalicoNodeRoute contains the status of BGP routes on the node.
+type CalicoNodeRoute struct {
 	// Destination of the route.
 	Destination string `json:"destination,omitempty"`
 
@@ -144,10 +165,11 @@ type CalicoNodeRoutes struct {
 	// Interface for the destination
 	Interface string `json:"interface,omitempty"`
 
-	// InstalledBy indicates who installed this route.
+	// LearnedFrom indicates who installed this route.
 	// If it is populated by a BGP peer, this is the name of the BGPPeer object.
 	// If it is populated by node mesh, this is the name of the node.
-	InstalledBy string `json:"installedBy,omitempty"`
+	// Or it is one of kernel, direct or static.
+	LearnedFrom string `json:"learnedFrom,omitempty"`
 }
 
 // NewCalicoNodeStatus creates a new (zeroed) CalicoNodeStatus struct with the TypeMetadata initialised to the current
@@ -164,9 +186,9 @@ func NewCalicoNodeStatus() *CalicoNodeStatus {
 type NodeStatusClassType string
 
 const (
-	NodeStatusClassTypeAgent    NodeStatusClassType = "Agent"
-	NodeStatusClassTypeBGPPeers                     = "BGPPeers"
-	NodeStatusClassTypeRoutes                       = "Routes"
+	NodeStatusClassTypeAgent NodeStatusClassType = "Agent"
+	NodeStatusClassTypeBGP                       = "BGP"
+	NodeStatusClassTypeRoute                     = "Route"
 )
 
 type BGPPeerType string
