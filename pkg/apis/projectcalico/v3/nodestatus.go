@@ -64,6 +64,7 @@ type CalicoNodeStatusSpec struct {
 type CalicoNodeStatusStatus struct {
 	// LastUpdated is a timestamp representing the server time when CalicoNodeStatus object
 	// last updated. It is represented in RFC3339 form and is in UTC.
+	// +nullable
 	LastUpdated metav1.Time `json:"lastUpdated,omitempty"`
 
 	// AdditionalInfo is a a human-readable description of the status of last update.
