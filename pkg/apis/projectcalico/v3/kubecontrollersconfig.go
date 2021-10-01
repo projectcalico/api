@@ -80,6 +80,9 @@ type ControllersConfig struct {
 
 	// Namespace enables and configures the namespace controller. Enabled by default, set to nil to disable.
 	Namespace *NamespaceControllerConfig `json:"namespace,omitempty"`
+
+	// RouteReflector enables and configures the route reflector controller. Disabled by default, set value to enable.
+	RouteReflector *RouteReflectorControllerConfig `json:"routereflector,omitempty"`
 }
 
 // NodeControllerConfig configures the node controller, which automatically cleans up configuration
@@ -131,6 +134,48 @@ type ServiceAccountControllerConfig struct {
 type NamespaceControllerConfig struct {
 	// ReconcilerPeriod is the period to perform reconciliation with the Calico datastore. [Default: 5m]
 	ReconcilerPeriod *metav1.Duration `json:"reconcilerPeriod,omitempty" validate:"omitempty"`
+}
+
+// RouteReflectorControllerConfig configures the route reflector controller, which scales Calico
+// route reflector topology.
+type RouteReflectorControllerConfig struct {
+	// ReconcilerPeriod is the period to perform reconciliation with the Calico datastore. [Default: 5m]
+	ReconcilerPeriod *metav1.Duration `json:"reconcilerPeriod,omitempty" validate:"omitempty"`
+
+	// TopologyType deines the type of topology, which can be [single, multi]. [Default: multi]
+	// +kubebuilder:default=multi
+	// +kubebuilder:validation:Pattern=`^(single|multi)$`
+	TopologyType *string `json:"topologyType,omitempty" validate:"omitempty,oneof=single multi"`
+
+	// ClusterID is the Route Reflector cluster id. Multi cluster topology uses zeros as wildcard. [Default: 224.0.0.0]
+	// +kubebuilder:default="224.0.0.0"
+	// +kubebuilder:validation:Pattern=`^\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b$`
+	ClusterID *string `json:"clusterId,omitempty" validate:"omitempty"`
+
+	// MinReplicas the minimum number of Route Refletors. [Default: 3]
+	// +kubebuilder:default=3
+	// +kubebuilder:validation:Minimum:=1
+	MinReplicas *int `json:"minReplicas,omitempty" validate:"omitempty"`
+
+	// MaxReplicas the maxium number of Route Refletors. [Default: 10]
+	// +kubebuilder:default=10
+	// +kubebuilder:validation:Minimum:=3
+	MaxReplicas *int `json:"maxReplicas,omitempty" validate:"omitempty"`
+
+	// RouteReflectorRatio defines the ratio of Route Reflectors and clients. [Default: 0.005]
+	RouteReflectorRatio *float32 `json:"routeReflectorRatio,omitempty" validate:"omitempty"`
+
+	// ClientConnectionRedundancy the number of route reflectors per client. Single cluster topology ignores. [Default: 3]
+	// +kubebuilder:default=3
+	// +kubebuilder:validation:Minimum:=1
+	ClientConnectionRedundancy *int `json:"clientConnectionRedundancy,omitempty" validate:"omitempty"`
+
+	// ZoneLabel zone label on Kubernetes nodes. [Default: topology.kubernetes.io/zone]
+	// +kubebuilder:default=topology.kubernetes.io/zone
+	ZoneLabel *string `json:"zoneLabel,omitempty" validate:"omitempty"`
+
+	// IncompatibleLabels Set of node labels to disallow Route Reflector selection.
+	IncompatibleLabels map[string]string `json:"incompatibleLabels,omitempty" validate:"omitempty"`
 }
 
 // KubeControllersConfigurationStatus represents the status of the configuration. It's useful for admins to

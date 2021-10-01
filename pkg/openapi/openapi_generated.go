@@ -71,6 +71,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.ProfileList":                        schema_pkg_apis_projectcalico_v3_ProfileList(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.ProfileSpec":                        schema_pkg_apis_projectcalico_v3_ProfileSpec(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.ProtoPort":                          schema_pkg_apis_projectcalico_v3_ProtoPort(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.RouteReflectorControllerConfig":     schema_pkg_apis_projectcalico_v3_RouteReflectorControllerConfig(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.RouteTableRange":                    schema_pkg_apis_projectcalico_v3_RouteTableRange(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.Rule":                               schema_pkg_apis_projectcalico_v3_Rule(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.RuleMetadata":                       schema_pkg_apis_projectcalico_v3_RuleMetadata(ref),
@@ -979,11 +980,17 @@ func schema_pkg_apis_projectcalico_v3_ControllersConfig(ref common.ReferenceCall
 							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.NamespaceControllerConfig"),
 						},
 					},
+					"routereflector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RouteReflector enables and configures the route reflector controller. Disabled by default, set value to enable.",
+							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.RouteReflectorControllerConfig"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NamespaceControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.PolicyControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.ServiceAccountControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.WorkloadEndpointControllerConfig"},
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.NamespaceControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.NodeControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.PolicyControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.RouteReflectorControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.ServiceAccountControllerConfig", "github.com/projectcalico/api/pkg/apis/projectcalico/v3.WorkloadEndpointControllerConfig"},
 	}
 }
 
@@ -3414,6 +3421,92 @@ func schema_pkg_apis_projectcalico_v3_ProtoPort(ref common.ReferenceCallback) co
 				Required: []string{"protocol", "port"},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_projectcalico_v3_RouteReflectorControllerConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "RouteReflectorControllerConfig configures the route reflector controller, which scales Calico route reflector topology.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"reconcilerPeriod": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReconcilerPeriod is the period to perform reconciliation with the Calico datastore. [Default: 5m]",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Duration"),
+						},
+					},
+					"topologyType": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TopologyType deines the type of topology, which can be [single, multi]. [Default: multi]",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clusterId": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClusterID is the Route Reflector cluster id. Multi cluster topology uses zeros as wildcard. [Default: 224.0.0.0]",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"minReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MinReplicas the minimum number of Route Refletors. [Default: 3]",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"maxReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxReplicas the maxium number of Route Refletors. [Default: 10]",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"routereflectorRatio": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RoutereflectorRatio defines the ratio of Route Reflectors and clients. [Default: 0.005]",
+							Type:        []string{"number"},
+							Format:      "float",
+						},
+					},
+					"clientConnectionRedundancy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientConnectionRedundancy the number of route reflectors per client. Single cluster topology ignores. [Default: 3]",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"zoneLabel": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ZoneLabel zone label on Kubernetes nodes. [Default: topology.kubernetes.io/zone]",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"incompatibleLabels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "IncompatibleLabels Set of node labels to disallow Route Reflector selection.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Duration"},
 	}
 }
 

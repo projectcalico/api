@@ -46,7 +46,11 @@ const (
 	OrchestratorDocker     = "libnetwork"
 	OrchestratorOpenStack  = "openstack"
 
-	// Enum options for enable/disable fields
+	// Enum options for enable/disable fields.
 	Enabled  = "Enabled"
 	Disabled = "Disabled"
+
+	// Known route reflector topologies.
+	SingleClusterTopology = "single"
+	MultiClusterTopology  = "multi"
 )
