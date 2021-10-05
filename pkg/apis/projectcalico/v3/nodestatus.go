@@ -175,7 +175,7 @@ type CalicoNodeRoute struct {
 	// If it is populated by a BGP peer, this is the name of the BGPPeer object.
 	// If it is populated by node mesh, this is the name of the node.
 	// Or it is one of kernel, direct or static.
-	LearnedFrom string `json:"learnedFrom,omitempty"`
+	LearnedFrom CalicoNodeRouteLearnedFrom `json:"learnedFrom,omitempty"`
 }
 
 // CalicoNodeRouteLearnedFrom contains the information of the source from which a routes has been learned.
