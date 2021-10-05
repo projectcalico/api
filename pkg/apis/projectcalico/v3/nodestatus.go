@@ -111,10 +111,10 @@ type CalicoNodeBGPStatus struct {
 // CalicoNodeBGPRouteStatus defines the observed state of routes status on the node.
 type CalicoNodeBGPRouteStatus struct {
 	// V4 represents IPv4 routes on the node.
-	V4Routes []CalicoNodeRoutes `json:"v4Routes,omitempty"`
+	V4Routes []CalicoNodeRoute `json:"v4Routes,omitempty"`
 
 	// V6 represents IPv6 routes on the node.
-	V6Routes []CalicoNodeRoutes `json:"v6Routes,omitempty"`
+	V6Routes []CalicoNodeRoute `json:"v6Routes,omitempty"`
 }
 
 // CalicoNodeBirdStatus defines the observed state of bird.
@@ -157,8 +157,11 @@ type CalicoNodePeer struct {
 	Info string `json:"reason,omitempty"`
 }
 
-// CalicoNodeRoutes contains the status of BGP routes on the node.
-type CalicoNodeRoutes struct {
+// CalicoNodeRoute contains the status of BGP routes on the node.
+type CalicoNodeRoute struct {
+	// Type indicates if the route is being used for forwarding or not.
+	Type CalicoNodeRouteType `json:"type,omitempty"`
+
 	// Destination of the route.
 	Destination string `json:"destination,omitempty"`
 
@@ -197,6 +200,13 @@ func NewCalicoNodeStatus() *CalicoNodeStatus {
 		},
 	}
 }
+
+type CalicoNodeRouteType string
+
+const (
+	RouteTypeFIB CalicoNodeRouteType = "FIB"
+	RouteTypeRIB                     = "RIB"
+)
 
 type CalicoNodeRouteSourceType string
 
