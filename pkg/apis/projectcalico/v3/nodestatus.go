@@ -51,12 +51,13 @@ type CalicoNodeStatusSpec struct {
 	// The node name identifies the Calico node instance for node status.
 	Node string `json:"node,omitempty" validate:"required,name"`
 
-	// Classes specifies type of information CalicoNodeStatus should contain.
+	// Classes declares the types of information to monitor for this calico/node,
+	// and allows for selective status reporting about certain subsets of information.
 	Classes []NodeStatusClassType `json:"classes,omitempty"`
 
 	// UpdateIntervalInSeconds is the period at which CalicoNodeStatus should be updated.
 	// Set to 0 to disable CalicoNodeStatus refresh. [Default: 10]
-	UpdateIntervalInSeconds int `json:"updateIntervalInSeconds,omitempty"`
+	UpdateIntervalInSeconds *int `json:"updateIntervalInSeconds,omitempty"`
 }
 
 // CalicoNodeStatusStatus defines the observed state of CalicoNodeStatus.
@@ -67,35 +68,38 @@ type CalicoNodeStatusStatus struct {
 	// +nullable
 	LastUpdated metav1.Time `json:"lastUpdated,omitempty"`
 
-	// AdditionalInfo is a a human-readable description of the status of last update.
-	AdditionalInfo string `json:"additionalInfo,omitempty"`
-
 	// Agent holds agent status on the node.
 	Agent CalicoNodeAgentStatus `json:"agent,omitempty"`
 
 	// BGP holds node BGP status.
 	BGP CalicoNodeBGPStatus `json:"bgp,omitempty"`
 
-	// Route represents routes on the node.
-	Route CalicoNodeRouteStatus `json:"route,omitempty"`
+	// Routes reports routes known to the Calico BGP daemon on the node.
+	Routes CalicoNodeBGPRouteStatus `json:"routes,omitempty"`
 }
 
 // CalicoNodeAgentStatus defines the observed state of agent status on the node.
 type CalicoNodeAgentStatus struct {
 	// Bird4 represents the latest observed status of bird4.
-	Bird4 CalicoNodeBirdStatus `json:"bird4,omitempty"`
+	Birdv4 CalicoNodeBirdStatus `json:"birdv4,omitempty"`
 
 	// Bird6 represents the latest observed status of bird6.
-	Bird6 CalicoNodeBirdStatus `json:"bird6,omitempty"`
+	Birdv6 CalicoNodeBirdStatus `json:"birdv6,omitempty"`
 }
 
 // CalicoNodeBGPStatus defines the observed state of BGP status on the node.
 type CalicoNodeBGPStatus struct {
-	// The total number of established bgp sessions.
-	NumEstablished int `json:"numEstablished,omitempty"`
+	// The total number of IPv4 established bgp sessions.
+	V4NumEstablished int `json:"v4NumEstablished,omitempty"`
 
-	// The total number of non-established bgp sessions.
-	NumNotEstablished int `json:"numNotEstablished,omitempty"`
+	// The total number of IPv4 non-established bgp sessions.
+	V4NumNotEstablished int `json:"v4NumNotEstablished,omitempty"`
+
+	// The total number of IPv6 established bgp sessions.
+	V6NumEstablished int `json:"v6NumEstablished,omitempty"`
+
+	// The total number of IPv6 non-established bgp sessions.
+	V6NumNotEstablished int `json:"v6NumNotEstablished,omitempty"`
 
 	// V4Peers represents IPv4 BGP peers status on the node.
 	V4Peers []CalicoNodePeer `json:"v4Peers,omitempty"`
@@ -104,13 +108,13 @@ type CalicoNodeBGPStatus struct {
 	V6Peers []CalicoNodePeer `json:"v6Peers,omitempty"`
 }
 
-// CalicoNodeRouteStatus defines the observed state of routes status on the node.
-type CalicoNodeRouteStatus struct {
+// CalicoNodeBGPRouteStatus defines the observed state of routes status on the node.
+type CalicoNodeBGPRouteStatus struct {
 	// V4 represents IPv4 routes on the node.
-	V4 []CalicoNodeRoute `json:"bird4,omitempty"`
+	V4Routes []CalicoNodeRoute `json:"v4Routes,omitempty"`
 
 	// V6 represents IPv6 routes on the node.
-	V6 []CalicoNodeRoute `json:"bird6,omitempty"`
+	V6Routes []CalicoNodeRoute `json:"v6Routes,omitempty"`
 }
 
 // CalicoNodeBirdStatus defines the observed state of bird.
@@ -121,42 +125,43 @@ type CalicoNodeBirdStatus struct {
 	// Bird version.
 	Version string `json:"version,omitempty"`
 
-	// Route ID used by bird.
-	RouteID string `json:"routeID,omitempty"`
+	// Router ID used by bird.
+	RouterID string `json:"routerID,omitempty"`
 
-	// ServerTime holds the value of serverTime from birdctl output.
+	// ServerTime holds the value of serverTime from bird.ctl output.
 	ServerTime string `json:"serverTime,omitempty"`
 
-	// LastBootTime holds the value of lastBootTime from birdctl output.
+	// LastBootTime holds the value of lastBootTime from bird.ctl output.
 	LastBootTime string `json:"lastBootTime,omitempty"`
 
-	// LastReconfigTime holds the value of lastReconfigTime from birdctl output.
+	// LastReconfigTime holds the value of lastReconfigTime from bird.ctl output.
 	LastReconfigTime string `json:"lastReconfigTime,omitempty"`
 }
 
 // CalicoNodePeer contains the status of BGP peers on the node.
 type CalicoNodePeer struct {
 	// IP address of the peer whose condition we are reporting.
-	// If port number is given, format should be `[<IPv6>]:port` or `<IPv4>:<port>` for IPv4.
-	// If optional port number is not set, and this peer IP and ASNumber belongs to a calico/node
-	// with ListenPort set in BGPConfiguration, then we use that port to peer.
 	PeerIP string `json:"peerIP,omitempty"`
 
-	// The type is type of bgp session state.
+	// Type indicates whether this peer is configured via the node-to-node mesh,
+	// or via en explicit global or per-node BGPPeer object.
 	Type BGPPeerType `json:"type,omitempty"`
 
-	// The state is the bgp session state.
+	// The state is the bird bgp session state.
 	State string `json:"state,omitempty"`
 
-	// Since is the time since the condition last changed.
+	// Since the state or reason last changed.
 	Since string `json:"since,omitempty"`
 
-	// The reason it's in the current state.
-	Reason string `json:"reason,omitempty"`
+	// Extra information from bird on the bgp session.
+	Info string `json:"reason,omitempty"`
 }
 
 // CalicoNodeRoute contains the status of BGP routes on the node.
 type CalicoNodeRoute struct {
+	// Type indicates if the route is being used for forwarding or not.
+	Type CalicoNodeRouteType `json:"type,omitempty"`
+
 	// Destination of the route.
 	Destination string `json:"destination,omitempty"`
 
@@ -170,7 +175,19 @@ type CalicoNodeRoute struct {
 	// If it is populated by a BGP peer, this is the name of the BGPPeer object.
 	// If it is populated by node mesh, this is the name of the node.
 	// Or it is one of kernel, direct or static.
-	LearnedFrom string `json:"learnedFrom,omitempty"`
+	LearnedFrom CalicoNodeRouteLearnedFrom `json:"learnedFrom,omitempty"`
+}
+
+// CalicoNodeRouteLearnedFrom contains the information of the source from which a routes has been learned.
+type CalicoNodeRouteLearnedFrom struct {
+	// Type of the source where a route is learned from.
+	SourceType CalicoNodeRouteSourceType `json:"sourceType,omitempty"`
+
+	// If sourceType is NodeMesh or BGPPeer, IP address of the router that sent us this route.
+	PeerIP string `json:"peerIP,omitempty"`
+
+	// If source is a Kubernetes node running Calico, the name of the Kubernetes node that originated the route.
+	Node string `json:"node,omitempty" validate:"required,name"`
 }
 
 // NewCalicoNodeStatus creates a new (zeroed) CalicoNodeStatus struct with the TypeMetadata initialised to the current
@@ -184,12 +201,29 @@ func NewCalicoNodeStatus() *CalicoNodeStatus {
 	}
 }
 
+type CalicoNodeRouteType string
+
+const (
+	RouteTypeFIB CalicoNodeRouteType = "FIB"
+	RouteTypeRIB                     = "RIB"
+)
+
+type CalicoNodeRouteSourceType string
+
+const (
+	RouteSourceTypeKernel      CalicoNodeRouteSourceType = "Kernel"
+	RouteSourceTypeStatic                                = "Static"
+	RouteSourceTypeDirect                                = "Direct"
+	RouteSourceTypeNodeMesh                              = "NodeMesh"
+	RouteSourceTypeNodeBGPPeer                           = "BGPPeer"
+)
+
 type NodeStatusClassType string
 
 const (
-	NodeStatusClassTypeAgent NodeStatusClassType = "Agent"
-	NodeStatusClassTypeBGP                       = "BGP"
-	NodeStatusClassTypeRoute                     = "Route"
+	NodeStatusClassTypeAgent  NodeStatusClassType = "Agent"
+	NodeStatusClassTypeBGP                        = "BGP"
+	NodeStatusClassTypeRoutes                     = "Routes"
 )
 
 type BGPPeerType string
