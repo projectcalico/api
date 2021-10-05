@@ -32,8 +32,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPStatus":                schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus":               schema_pkg_apis_projectcalico_v3_CalicoNodeBirdStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeer":                     schema_pkg_apis_projectcalico_v3_CalicoNodePeer(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute":                    schema_pkg_apis_projectcalico_v3_CalicoNodeRoute(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRouteLearnedFrom":         schema_pkg_apis_projectcalico_v3_CalicoNodeRouteLearnedFrom(ref),
-		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoutes":                   schema_pkg_apis_projectcalico_v3_CalicoNodeRoutes(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeStatus":                   schema_pkg_apis_projectcalico_v3_CalicoNodeStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeStatusList":               schema_pkg_apis_projectcalico_v3_CalicoNodeStatusList(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeStatusSpec":               schema_pkg_apis_projectcalico_v3_CalicoNodeStatusSpec(ref),
@@ -833,7 +833,7 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPRouteStatus(ref common.Refere
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoutes"),
+										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute"),
 									},
 								},
 							},
@@ -847,7 +847,7 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPRouteStatus(ref common.Refere
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoutes"),
+										Ref:     ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute"),
 									},
 								},
 							},
@@ -857,7 +857,7 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPRouteStatus(ref common.Refere
 			},
 		},
 		Dependencies: []string{
-			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoutes"},
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute"},
 	}
 }
 
@@ -1035,47 +1035,20 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodePeer(ref common.ReferenceCallbac
 	}
 }
 
-func schema_pkg_apis_projectcalico_v3_CalicoNodeRouteLearnedFrom(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_projectcalico_v3_CalicoNodeRoute(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "CalicoNodeRouteLearnedFrom contains the information of the source from which a routes has been learned.",
+				Description: "CalicoNodeRoute contains the status of BGP routes on the node.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"sourceType": {
+					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type of the source where a route is learned from.",
+							Description: "Type indicates if the route is being used for forwarding or not.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"peerIP": {
-						SchemaProps: spec.SchemaProps{
-							Description: "If sourceType is NodeMesh or BGPPeer, IP address of the router that sent us this route.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"node": {
-						SchemaProps: spec.SchemaProps{
-							Description: "If source is a Kubernetes node running Calico, the name of the Kubernetes node that originated the route.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_projectcalico_v3_CalicoNodeRoutes(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "CalicoNodeRoutes contains the status of BGP routes on the node.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
 					"destination": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Destination of the route.",
@@ -1100,6 +1073,40 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeRoutes(ref common.ReferenceCallb
 					"learnedFrom": {
 						SchemaProps: spec.SchemaProps{
 							Description: "LearnedFrom indicates who installed this route. If it is populated by a BGP peer, this is the name of the BGPPeer object. If it is populated by node mesh, this is the name of the node. Or it is one of kernel, direct or static.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_projectcalico_v3_CalicoNodeRouteLearnedFrom(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CalicoNodeRouteLearnedFrom contains the information of the source from which a routes has been learned.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"sourceType": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type of the source where a route is learned from.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"peerIP": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If sourceType is NodeMesh or BGPPeer, IP address of the router that sent us this route.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"node": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If source is a Kubernetes node running Calico, the name of the Kubernetes node that originated the route.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
