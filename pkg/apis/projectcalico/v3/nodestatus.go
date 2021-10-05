@@ -211,9 +211,9 @@ const (
 type NodeStatusClassType string
 
 const (
-	NodeStatusClassTypeAgent NodeStatusClassType = "Agent"
-	NodeStatusClassTypeBGP                       = "BGP"
-	NodeStatusClassTypeRoute                     = "Route"
+	NodeStatusClassTypeAgent  NodeStatusClassType = "Agent"
+	NodeStatusClassTypeBGP                        = "BGP"
+	NodeStatusClassTypeRoutes                     = "Routes"
 )
 
 type BGPPeerType string
