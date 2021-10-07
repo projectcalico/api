@@ -55,9 +55,9 @@ type CalicoNodeStatusSpec struct {
 	// and allows for selective status reporting about certain subsets of information.
 	Classes []NodeStatusClassType `json:"classes,omitempty"`
 
-	// UpdateIntervalInSeconds is the period at which CalicoNodeStatus should be updated.
+	// UpdatePeriodSeconds is the period at which CalicoNodeStatus should be updated.
 	// Set to 0 to disable CalicoNodeStatus refresh. [Default: 10]
-	UpdateIntervalInSeconds *int `json:"updateIntervalInSeconds,omitempty"`
+	UpdatePeriodSeconds *uint32 `json:"updatePeriodSeconds,omitempty"`
 }
 
 // CalicoNodeStatusStatus defines the observed state of CalicoNodeStatus.
@@ -80,49 +80,49 @@ type CalicoNodeStatusStatus struct {
 
 // CalicoNodeAgentStatus defines the observed state of agent status on the node.
 type CalicoNodeAgentStatus struct {
-	// Bird4 represents the latest observed status of bird4.
-	Birdv4 CalicoNodeBirdStatus `json:"birdv4,omitempty"`
+	// BIRDV4 represents the latest observed status of bird4.
+	BIRDV4 BGPDaemonStatus `json:"birdV4,omitempty"`
 
-	// Bird6 represents the latest observed status of bird6.
-	Birdv6 CalicoNodeBirdStatus `json:"birdv6,omitempty"`
+	// BIRDV6 represents the latest observed status of bird6.
+	BIRDV6 BGPDaemonStatus `json:"birdV6,omitempty"`
 }
 
 // CalicoNodeBGPStatus defines the observed state of BGP status on the node.
 type CalicoNodeBGPStatus struct {
 	// The total number of IPv4 established bgp sessions.
-	V4NumEstablished int `json:"v4NumEstablished,omitempty"`
+	NumberEstablishedV4 int `json:"numberEstablishedV4,omitempty"`
 
 	// The total number of IPv4 non-established bgp sessions.
-	V4NumNotEstablished int `json:"v4NumNotEstablished,omitempty"`
+	NumberNotEstablishedV4 int `json:"numberNotEstablishedV4,omitempty"`
 
 	// The total number of IPv6 established bgp sessions.
-	V6NumEstablished int `json:"v6NumEstablished,omitempty"`
+	NumberEstablishedV6 int `json:"numberEstablishedV6,omitempty"`
 
 	// The total number of IPv6 non-established bgp sessions.
-	V6NumNotEstablished int `json:"v6NumNotEstablished,omitempty"`
+	NumberNotEstablishedV6 int `json:"numberNotEstablishedV6,omitempty"`
 
-	// V4Peers represents IPv4 BGP peers status on the node.
-	V4Peers []CalicoNodePeer `json:"v4Peers,omitempty"`
+	// PeersV4 represents IPv4 BGP peers status on the node.
+	PeersV4 []CalicoNodePeer `json:"peersV4,omitempty"`
 
-	// V6Peers represents IPv6 BGP peers status on the node.
-	V6Peers []CalicoNodePeer `json:"v6Peers,omitempty"`
+	// PeersV6 represents IPv6 BGP peers status on the node.
+	PeersV6 []CalicoNodePeer `json:"peersV6,omitempty"`
 }
 
 // CalicoNodeBGPRouteStatus defines the observed state of routes status on the node.
 type CalicoNodeBGPRouteStatus struct {
-	// V4 represents IPv4 routes on the node.
-	V4Routes []CalicoNodeRoute `json:"v4Routes,omitempty"`
+	// RoutesV4 represents IPv4 routes on the node.
+	RoutesV4 []CalicoNodeRoute `json:"routesV4,omitempty"`
 
-	// V6 represents IPv6 routes on the node.
-	V6Routes []CalicoNodeRoute `json:"v6Routes,omitempty"`
+	// RoutesV6 represents IPv6 routes on the node.
+	RoutesV6 []CalicoNodeRoute `json:"routesV6,omitempty"`
 }
 
-// CalicoNodeBirdStatus defines the observed state of bird.
-type CalicoNodeBirdStatus struct {
-	// Ready indicates if bird status is ready.
-	Ready bool `json:"ready,omitempty"`
+// BGPDaemonStatus defines the observed state of BGP daemon.
+type BGPDaemonStatus struct {
+	// The state of the BGP Daemon.
+	State BGPDaemonState `json:"state,omitempty"`
 
-	// Bird version.
+	// Version of the BGP daemon
 	Version string `json:"version,omitempty"`
 
 	// Router ID used by bird.
@@ -134,8 +134,8 @@ type CalicoNodeBirdStatus struct {
 	// LastBootTime holds the value of lastBootTime from bird.ctl output.
 	LastBootTime string `json:"lastBootTime,omitempty"`
 
-	// LastReconfigTime holds the value of lastReconfigTime from bird.ctl output.
-	LastReconfigTime string `json:"lastReconfigTime,omitempty"`
+	// LastReconfigurationTime holds the value of lastReconfigTime from bird.ctl output.
+	LastReconfigurationTime string `json:"lastReconfigurationTime,omitempty"`
 }
 
 // CalicoNodePeer contains the status of BGP peers on the node.
@@ -147,14 +147,11 @@ type CalicoNodePeer struct {
 	// or via en explicit global or per-node BGPPeer object.
 	Type BGPPeerType `json:"type,omitempty"`
 
-	// The state is the bird bgp session state.
-	State string `json:"state,omitempty"`
+	// State is the BGP session state.
+	State BGPSessionState `json:"state,omitempty"`
 
 	// Since the state or reason last changed.
 	Since string `json:"since,omitempty"`
-
-	// Extra information from bird on the bgp session.
-	Info string `json:"reason,omitempty"`
 }
 
 // CalicoNodeRoute contains the status of BGP routes on the node.
@@ -211,11 +208,11 @@ const (
 type CalicoNodeRouteSourceType string
 
 const (
-	RouteSourceTypeKernel      CalicoNodeRouteSourceType = "Kernel"
-	RouteSourceTypeStatic                                = "Static"
-	RouteSourceTypeDirect                                = "Direct"
-	RouteSourceTypeNodeMesh                              = "NodeMesh"
-	RouteSourceTypeNodeBGPPeer                           = "BGPPeer"
+	RouteSourceTypeKernel   CalicoNodeRouteSourceType = "Kernel"
+	RouteSourceTypeStatic                             = "Static"
+	RouteSourceTypeDirect                             = "Direct"
+	RouteSourceTypeNodeMesh                           = "NodeMesh"
+	RouteSourceTypeBGPPeer                            = "BGPPeer"
 )
 
 type NodeStatusClassType string
@@ -232,4 +229,23 @@ const (
 	BGPPeerTypeNodeMesh   BGPPeerType = "NodeMesh"
 	BGPPeerTypeNodePeer               = "NodePeer"
 	BGPPeerTypeGlobalPeer             = "GlobalPeer"
+)
+
+type BGPDaemonState string
+
+const (
+	BGPDaemonStateReady    BGPDaemonState = "Ready"
+	BGPDaemonStateNotReady                = "NotReady"
+)
+
+type BGPSessionState string
+
+const (
+	BGPSessionStateIdle        BGPSessionState = "Idle"
+	BGPSessionStateConnect                     = "Connect"
+	BGPSessionStateActive                      = "Active"
+	BGPSessionStateOpenSent                    = "OpenSent"
+	BGPSessionStateOpenConfirm                 = "OpenConfirm"
+	BGPSessionStateEstablished                 = "Established"
+	BGPSessionStateClose                       = "Close"
 )
