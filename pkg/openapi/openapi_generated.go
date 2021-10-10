@@ -23,6 +23,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPConfiguration":                   schema_pkg_apis_projectcalico_v3_BGPConfiguration(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPConfigurationList":               schema_pkg_apis_projectcalico_v3_BGPConfigurationList(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPConfigurationSpec":               schema_pkg_apis_projectcalico_v3_BGPConfigurationSpec(ref),
+		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPDaemonStatus":                    schema_pkg_apis_projectcalico_v3_BGPDaemonStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPPassword":                        schema_pkg_apis_projectcalico_v3_BGPPassword(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPPeer":                            schema_pkg_apis_projectcalico_v3_BGPPeer(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPPeerList":                        schema_pkg_apis_projectcalico_v3_BGPPeerList(ref),
@@ -30,7 +31,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeAgentStatus":              schema_pkg_apis_projectcalico_v3_CalicoNodeAgentStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPRouteStatus":           schema_pkg_apis_projectcalico_v3_CalicoNodeBGPRouteStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBGPStatus":                schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref),
-		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus":               schema_pkg_apis_projectcalico_v3_CalicoNodeBirdStatus(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeer":                     schema_pkg_apis_projectcalico_v3_CalicoNodePeer(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRoute":                    schema_pkg_apis_projectcalico_v3_CalicoNodeRoute(ref),
 		"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeRouteLearnedFrom":         schema_pkg_apis_projectcalico_v3_CalicoNodeRouteLearnedFrom(ref),
@@ -605,6 +605,61 @@ func schema_pkg_apis_projectcalico_v3_BGPConfigurationSpec(ref common.ReferenceC
 	}
 }
 
+func schema_pkg_apis_projectcalico_v3_BGPDaemonStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "BGPDaemonStatus defines the observed state of BGP daemon.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"state": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The state of the BGP Daemon.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Version of the BGP daemon",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"routerID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Router ID used by bird.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"serverTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServerTime holds the value of serverTime from bird.ctl output.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"lastBootTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LastBootTime holds the value of lastBootTime from bird.ctl output.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"lastReconfigurationTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LastReconfigurationTime holds the value of lastReconfigTime from bird.ctl output.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_projectcalico_v3_BGPPassword(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -798,25 +853,25 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeAgentStatus(ref common.Reference
 				Description: "CalicoNodeAgentStatus defines the observed state of agent status on the node.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"birdv4": {
+					"birdV4": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Bird4 represents the latest observed status of bird4.",
+							Description: "BIRDV4 represents the latest observed status of bird4.",
 							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus"),
+							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPDaemonStatus"),
 						},
 					},
-					"birdv6": {
+					"birdV6": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Bird6 represents the latest observed status of bird6.",
+							Description: "BIRDV6 represents the latest observed status of bird6.",
 							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus"),
+							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPDaemonStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodeBirdStatus"},
+			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.BGPDaemonStatus"},
 	}
 }
 
@@ -827,9 +882,9 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPRouteStatus(ref common.Refere
 				Description: "CalicoNodeBGPRouteStatus defines the observed state of routes status on the node.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"v4Routes": {
+					"routesV4": {
 						SchemaProps: spec.SchemaProps{
-							Description: "V4 represents IPv4 routes on the node.",
+							Description: "RoutesV4 represents IPv4 routes on the node.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -841,9 +896,9 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPRouteStatus(ref common.Refere
 							},
 						},
 					},
-					"v6Routes": {
+					"routesV6": {
 						SchemaProps: spec.SchemaProps{
-							Description: "V6 represents IPv6 routes on the node.",
+							Description: "RoutesV6 represents IPv6 routes on the node.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -870,37 +925,37 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref common.ReferenceCa
 				Description: "CalicoNodeBGPStatus defines the observed state of BGP status on the node.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"v4NumEstablished": {
+					"numberEstablishedV4": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The total number of IPv4 established bgp sessions.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
-					"v4NumNotEstablished": {
+					"numberNotEstablishedV4": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The total number of IPv4 non-established bgp sessions.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
-					"v6NumEstablished": {
+					"numberEstablishedV6": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The total number of IPv6 established bgp sessions.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
-					"v6NumNotEstablished": {
+					"numberNotEstablishedV6": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The total number of IPv6 non-established bgp sessions.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
-					"v4Peers": {
+					"peersV4": {
 						SchemaProps: spec.SchemaProps{
-							Description: "V4Peers represents IPv4 BGP peers status on the node.",
+							Description: "PeersV4 represents IPv4 BGP peers status on the node.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -912,9 +967,9 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref common.ReferenceCa
 							},
 						},
 					},
-					"v6Peers": {
+					"peersV6": {
 						SchemaProps: spec.SchemaProps{
-							Description: "V6Peers represents IPv6 BGP peers status on the node.",
+							Description: "PeersV6 represents IPv6 BGP peers status on the node.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -931,61 +986,6 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeBGPStatus(ref common.ReferenceCa
 		},
 		Dependencies: []string{
 			"github.com/projectcalico/api/pkg/apis/projectcalico/v3.CalicoNodePeer"},
-	}
-}
-
-func schema_pkg_apis_projectcalico_v3_CalicoNodeBirdStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "CalicoNodeBirdStatus defines the observed state of bird.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"ready": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Ready indicates if bird status is ready.",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-					"version": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Bird version.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"routerID": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Router ID used by bird.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"serverTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ServerTime holds the value of serverTime from bird.ctl output.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"lastBootTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "LastBootTime holds the value of lastBootTime from bird.ctl output.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"lastReconfigTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "LastReconfigTime holds the value of lastReconfigTime from bird.ctl output.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-			},
-		},
 	}
 }
 
@@ -1012,7 +1012,7 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodePeer(ref common.ReferenceCallbac
 					},
 					"state": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The state is the bird bgp session state.",
+							Description: "State is the BGP session state.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1020,13 +1020,6 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodePeer(ref common.ReferenceCallbac
 					"since": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Since the state or reason last changed.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"reason": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Extra information from bird on the bgp session.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1245,11 +1238,11 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeStatusSpec(ref common.ReferenceC
 							},
 						},
 					},
-					"updateIntervalInSeconds": {
+					"updatePeriodSeconds": {
 						SchemaProps: spec.SchemaProps{
-							Description: "UpdateIntervalInSeconds is the period at which CalicoNodeStatus should be updated. Set to 0 to disable CalicoNodeStatus refresh. [Default: 10]",
+							Description: "UpdatePeriodSeconds is the period at which CalicoNodeStatus should be updated. Set to 0 to disable CalicoNodeStatus refresh. [Default: 10]",
 							Type:        []string{"integer"},
-							Format:      "int32",
+							Format:      "int64",
 						},
 					},
 				},
