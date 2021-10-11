@@ -53,7 +53,7 @@ type CalicoNodeStatusSpec struct {
 
 	// Classes declares the types of information to monitor for this calico/node,
 	// and allows for selective status reporting about certain subsets of information.
-	Classes []NodeStatusClassType `json:"classes,omitempty"`
+	Classes []NodeStatusClassType `json:"classes,omitempty" validate:"omitempty,nodestatusclasses"`
 
 	// UpdatePeriodSeconds is the period at which CalicoNodeStatus should be updated.
 	// Set to 0 to disable CalicoNodeStatus refresh. [Default: 10]
@@ -90,16 +90,16 @@ type CalicoNodeAgentStatus struct {
 // CalicoNodeBGPStatus defines the observed state of BGP status on the node.
 type CalicoNodeBGPStatus struct {
 	// The total number of IPv4 established bgp sessions.
-	NumberEstablishedV4 int `json:"numberEstablishedV4,omitempty"`
+	NumberEstablishedV4 int `json:"numberEstablishedV4"`
 
 	// The total number of IPv4 non-established bgp sessions.
-	NumberNotEstablishedV4 int `json:"numberNotEstablishedV4,omitempty"`
+	NumberNotEstablishedV4 int `json:"numberNotEstablishedV4"`
 
 	// The total number of IPv6 established bgp sessions.
-	NumberEstablishedV6 int `json:"numberEstablishedV6,omitempty"`
+	NumberEstablishedV6 int `json:"numberEstablishedV6"`
 
 	// The total number of IPv6 non-established bgp sessions.
-	NumberNotEstablishedV6 int `json:"numberNotEstablishedV6,omitempty"`
+	NumberNotEstablishedV6 int `json:"numberNotEstablishedV6"`
 
 	// PeersV4 represents IPv4 BGP peers status on the node.
 	PeersV4 []CalicoNodePeer `json:"peersV4,omitempty"`
@@ -128,9 +128,6 @@ type BGPDaemonStatus struct {
 	// Router ID used by bird.
 	RouterID string `json:"routerID,omitempty"`
 
-	// ServerTime holds the value of serverTime from bird.ctl output.
-	ServerTime string `json:"serverTime,omitempty"`
-
 	// LastBootTime holds the value of lastBootTime from bird.ctl output.
 	LastBootTime string `json:"lastBootTime,omitempty"`
 
@@ -141,7 +138,7 @@ type BGPDaemonStatus struct {
 // CalicoNodePeer contains the status of BGP peers on the node.
 type CalicoNodePeer struct {
 	// IP address of the peer whose condition we are reporting.
-	PeerIP string `json:"peerIP,omitempty"`
+	PeerIP string `json:"peerIP,omitempty" validate:"omitempty,ip"`
 
 	// Type indicates whether this peer is configured via the node-to-node mesh,
 	// or via en explicit global or per-node BGPPeer object.
@@ -168,10 +165,7 @@ type CalicoNodeRoute struct {
 	// Interface for the destination
 	Interface string `json:"interface,omitempty"`
 
-	// LearnedFrom indicates who installed this route.
-	// If it is populated by a BGP peer, this is the name of the BGPPeer object.
-	// If it is populated by node mesh, this is the name of the node.
-	// Or it is one of kernel, direct or static.
+	// LearnedFrom contains information regarding where this route originated.
 	LearnedFrom CalicoNodeRouteLearnedFrom `json:"learnedFrom,omitempty"`
 }
 
@@ -181,10 +175,7 @@ type CalicoNodeRouteLearnedFrom struct {
 	SourceType CalicoNodeRouteSourceType `json:"sourceType,omitempty"`
 
 	// If sourceType is NodeMesh or BGPPeer, IP address of the router that sent us this route.
-	PeerIP string `json:"peerIP,omitempty"`
-
-	// If source is a Kubernetes node running Calico, the name of the Kubernetes node that originated the route.
-	Node string `json:"node,omitempty" validate:"required,name"`
+	PeerIP string `json:"peerIP,omitempty, validate:"omitempty,ip"`
 }
 
 // NewCalicoNodeStatus creates a new (zeroed) CalicoNodeStatus struct with the TypeMetadata initialised to the current
