@@ -53,11 +53,11 @@ type CalicoNodeStatusSpec struct {
 
 	// Classes declares the types of information to monitor for this calico/node,
 	// and allows for selective status reporting about certain subsets of information.
-	Classes []NodeStatusClassType `json:"classes,omitempty" validate:"omitempty,nodestatusclasses"`
+	Classes []NodeStatusClassType `json:"classes,omitempty" validate:"required,nodestatusclasses"`
 
 	// UpdatePeriodSeconds is the period at which CalicoNodeStatus should be updated.
-	// Set to 0 to disable CalicoNodeStatus refresh. [Default: 10]
-	UpdatePeriodSeconds *uint32 `json:"updatePeriodSeconds,omitempty"`
+	// Set to 0 to disable CalicoNodeStatus refresh.
+	UpdatePeriodSeconds *uint32 `json:"updatePeriodSeconds,omitempty" validate:"required"`
 }
 
 // CalicoNodeStatusStatus defines the observed state of CalicoNodeStatus.
