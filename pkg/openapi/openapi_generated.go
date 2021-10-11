@@ -1231,7 +1231,7 @@ func schema_pkg_apis_projectcalico_v3_CalicoNodeStatusSpec(ref common.ReferenceC
 					},
 					"updatePeriodSeconds": {
 						SchemaProps: spec.SchemaProps{
-							Description: "UpdatePeriodSeconds is the period at which CalicoNodeStatus should be updated. Set to 0 to disable CalicoNodeStatus refresh. [Default: 10]",
+							Description: "UpdatePeriodSeconds is the period at which CalicoNodeStatus should be updated. Set to 0 to disable CalicoNodeStatus refresh. Maximum update period is one day.",
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
