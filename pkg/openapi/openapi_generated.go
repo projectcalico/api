@@ -3170,6 +3170,13 @@ func schema_pkg_apis_projectcalico_v3_IPPoolSpec(ref common.ReferenceCallback) c
 							},
 						},
 					},
+					"disableBGPExport": {
+						SchemaProps: spec.SchemaProps{
+							Description: "When disableBGPExport is true, Calico will not export routes from this pool’s CIDR over BGP.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"cidr"},
 			},
