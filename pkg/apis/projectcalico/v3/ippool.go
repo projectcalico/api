@@ -82,6 +82,9 @@ type IPPoolSpec struct {
 	// AllowedUse controls what the IP pool will be used for.  If not specified or empty, defaults to
 	// ["Tunnel", "Workload"] for back-compatibility
 	AllowedUses []IPPoolAllowedUse `json:"allowedUses,omitempty" validate:"omitempty"`
+
+	// When disableBGPExport is true, Calico will not export routes from this pool’s CIDR over BGP.
+	DisableBGPExport bool `json:"disableBGPExport,omitempty" validate:"omitempty,mustBeFalse"`
 }
 
 type IPPoolAllowedUse string
