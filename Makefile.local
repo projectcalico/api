@@ -4,7 +4,7 @@
 
 # update pulls in the latest contents of this repository from the upstream
 # github.com/projectcalico/calico/api directory.
-CALICO_VERSION ?= master
+CALICO_VERSION ?= $(shell git rev-parse --abbrev-ref HEAD)
 update:
 	rm -rf /tmp/calico-api-mirror
 	mkdir -p /tmp/calico-api-mirror
@@ -15,4 +15,3 @@ update:
 	# Some files, we want to keep the local versions of. 
 	# For example, README content is different between the two locations.
 	git checkout README.md
-
