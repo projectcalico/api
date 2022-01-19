@@ -12,4 +12,7 @@ update:
 	cp -r /tmp/calico-api-mirror/api/. .
 	cp /tmp/calico-api-mirror/lib.Makefile .
 	cp /tmp/calico-api-mirror/metadata.mk .
+	# Some files, we want to keep the local versions of. 
+	# For example, README content is different between the two locations.
+	git checkout README.md
 
