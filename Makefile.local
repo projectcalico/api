@@ -1,0 +1,29 @@
+# This is the local Makefile for the projectcalico/api repository, with targets
+# specific to github.com/projectcalico/api. This is opposed to Makefile, which
+# is mirrored from github.com/projectcalico/calico/api.
+
+# update pulls in the latest contents of this repository from the upstream
+# github.com/projectcalico/calico/api directory.
+CALICO_VERSION ?= $(shell git rev-parse --abbrev-ref HEAD)
+update:
+	# Add in the calico repo as a remote.
+	git remote add calico git@github.com:projectcalico/calico.git  || true
+	git fetch calico
+	# Create a merge-branch which we'll use to merge in the latest from projectcalico/calico
+	git branch -D merge-branch; git checkout -b merge-branch
+	# Checkout calico/$(CALICO_VERSION) and filter out everything that's not part of the api/ dir.
+	git branch -D calico-$(CALICO_VERSION); git checkout -b calico-$(CALICO_VERSION) calico/$(CALICO_VERSION)
+	# We want lib.Makefile and metadata.mk to be copied to the resulting repo as well.
+	git mv lib.Makefile api/
+	git mv metadata.mk api/
+	git commit -m "Mirror lib.Makefile and metadata.mk"
+	git filter-branch -f --subdirectory-filter api/ -- --all
+	# Merge the Calico code into the merge branch.
+	git checkout merge-branch && git merge calico-$(CALICO_VERSION)
+	# Copy back overlay files.
+	cp overlay/README.md README.md
+	git add README.md && git commit -m "Add back proper README post-mirroring"
+	# Delete temporary branches.
+	git branch -D calico-$(CALICO_VERSION)
+	@echo "Merged in api/ contents from projectcalico/calico@$(CALICO_VERSION)"
+	@echo "Now, push this branch and submit as a PR"
