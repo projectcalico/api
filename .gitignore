@@ -1,13 +1,22 @@
-.go-pkg-cache/
-report/
-bin/
-*.created*
-.idea
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-/* Produced as part of release */
-hack/release/release
-node/windows-packaging/CalicoWindows/confd/config-bgp.ps1
-node/windows-packaging/CalicoWindows/confd/config-bgp.psm1
-_output
-hack/release/ghr
-builder.coverprofile
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+.generate_execs
+.generate_files
+.go-pkg-cache/
+Makefile.common*
+bin/
+
+# IDE files
+/.idea/
+/.vscode/
