@@ -21,4 +21,4 @@ update: check-dirty
 	git checkout Makefile.local README.md
 
 check-dirty:
-	git diff --quiet || echo "Repository has local changes" && exit 1
+	git diff --quiet || (echo "Repository has local changes" && exit 1)
