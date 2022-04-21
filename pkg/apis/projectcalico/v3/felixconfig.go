@@ -60,11 +60,29 @@ const (
 	AWSSrcDstCheckOptionDisable                        = "Disable"
 )
 
+// +kubebuilder:validation:Enum=Enabled;Disabled
+type FloatingIPType string
+
+const (
+	FloatingIPsEnabled  FloatingIPType = "Enabled"
+	FloatingIPsDisabled FloatingIPType = "Disabled"
+)
+
 // FelixConfigurationSpec contains the values of the Felix configuration.
 type FelixConfigurationSpec struct {
-	UseInternalDataplaneDriver *bool  `json:"useInternalDataplaneDriver,omitempty"`
-	DataplaneDriver            string `json:"dataplaneDriver,omitempty"`
+	// UseInternalDataplaneDriver, if true, Felix will use its internal dataplane programming logic.  If false, it
+	// will launch an external dataplane driver and communicate with it over protobuf.
+	UseInternalDataplaneDriver *bool `json:"useInternalDataplaneDriver,omitempty"`
+	// DataplaneDriver filename of the external dataplane driver to use.  Only used if UseInternalDataplaneDriver
+	// is set to false.
+	DataplaneDriver string `json:"dataplaneDriver,omitempty"`
 
+	// DataplaneWatchdogTimeout is the readiness/liveness timeout used for Felix's (internal) dataplane driver.
+	// Increase this value if you experience spurious non-ready or non-live events when Felix is under heavy load.
+	// Decrease the value to get felix to report non-live or non-ready more quickly. [Default: 90s]
+	DataplaneWatchdogTimeout *metav1.Duration `json:"dataplaneWatchdogTimeout,omitempty" configv1timescale:"seconds"`
+
+	// IPv6Support controls whether Felix enables support for IPv6 (if supported by the in-use dataplane).
 	IPv6Support *bool `json:"ipv6Support,omitempty" confignamev1:"Ipv6Support"`
 
 	// RouteRefreshInterval is the period at which Felix re-checks the routes
@@ -184,11 +202,13 @@ type FelixConfigurationSpec struct {
 	// to Debug level logs.
 	LogDebugFilenameRegex string `json:"logDebugFilenameRegex,omitempty" validate:"omitempty,regexp"`
 
+	// IPIPEnabled overrides whether Felix should configure an IPIP interface on the host. Optional as Felix determines this based on the existing IP pools. [Default: nil (unset)]
 	IPIPEnabled *bool `json:"ipipEnabled,omitempty" confignamev1:"IpInIpEnabled"`
 	// IPIPMTU is the MTU to set on the tunnel device. See Configuring MTU [Default: 1440]
 	IPIPMTU *int `json:"ipipMTU,omitempty" confignamev1:"IpInIpMtu"`
 
-	VXLANEnabled *bool `json:"vxlanEnabled,omitempty"`
+	// VXLANEnabled overrides whether Felix should create the VXLAN tunnel device for VXLAN networking. Optional as Felix determines this based on the existing IP pools. [Default: nil (unset)]
+	VXLANEnabled *bool `json:"vxlanEnabled,omitempty" confignamev1:"VXLANEnabled"`
 	// VXLANMTU is the MTU to set on the tunnel device. See Configuring MTU [Default: 1440]
 	VXLANMTU  *int `json:"vxlanMTU,omitempty"`
 	VXLANPort *int `json:"vxlanPort,omitempty"`
@@ -279,9 +299,13 @@ type FelixConfigurationSpec struct {
 	// (ie it uses the iptables MASQUERADE target)
 	NATOutgoingAddress string `json:"natOutgoingAddress,omitempty"`
 
-	// This is the source address to use on programmed device routes. By default the source address is left blank,
+	// This is the IPv4 source address to use on programmed device routes. By default the source address is left blank,
 	// leaving the kernel to choose the source address used.
 	DeviceRouteSourceAddress string `json:"deviceRouteSourceAddress,omitempty"`
+
+	// This is the IPv6 source address to use on programmed device routes. By default the source address is left blank,
+	// leaving the kernel to choose the source address used.
+	DeviceRouteSourceAddressIPv6 string `json:"deviceRouteSourceAddressIPv6,omitempty"`
 
 	// This defines the route protocol added to programmed device routes, by default this will be RTPROT_BOOT
 	// when left blank.
@@ -360,14 +384,43 @@ type FelixConfigurationSpec struct {
 	// a problem if this range overlaps with the operating systems. Both ends of the range are
 	// inclusive. [Default: 20000:29999]
 	BPFPSNATPorts *numorstring.Port `json:"bpfPSNATPorts,omitempty"`
-
+	// BPFMapSizeNATFrontend sets the size for nat front end map.
+	// FrontendMap should be large enough to hold an entry for each nodeport,
+	// external IP and each port in each service.
+	BPFMapSizeNATFrontend *int `json:"bpfMapSizeNATFrontend,omitempty"`
+	// BPFMapSizeNATBackend sets the size for nat back end map.
+	// This is the total number of endpoints. This is mostly
+	// more than the size of the number of services.
+	BPFMapSizeNATBackend  *int `json:"bpfMapSizeNATBackend,omitempty"`
+	BPFMapSizeNATAffinity *int `json:"bpfMapSizeNATAffinity,omitempty"`
+	// BPFMapSizeRoute sets the size for the routes map.  The routes map should be large enough
+	// to hold one entry per workload and a handful of entries per host (enough to cover its own IPs and
+	// tunnel IPs).
+	BPFMapSizeRoute *int `json:"bpfMapSizeRoute,omitempty"`
+	// BPFMapSizeConntrack sets the size for the conntrack map.  This map must be large enough to hold
+	// an entry for each active connection.  Warning: changing the size of the conntrack map can cause disruption.
+	BPFMapSizeConntrack *int `json:"bpfMapSizeConntrack,omitempty"`
+	// BPFMapSizeIPSets sets the size for ipsets map.  The IP sets map must be large enough to hold an entry
+	// for each endpoint matched by every selector in the source/destination matches in network policy.  Selectors
+	// such as "all()" can result in large numbers of entries (one entry per endpoint in that case).
+	BPFMapSizeIPSets *int `json:"bpfMapSizeIPSets,omitempty"`
+	// BPFEnforceRPF enforce strict RPF on all interfaces with BPF programs regardless of
+	// what is the per-interfaces or global setting. Possible values are Disabled or
+	// Strict. [Default: Strict]
+	BPFEnforceRPF string `json:"bpfEnforceRPF,omitempty"`
 	// RouteSource configures where Felix gets its routing information.
 	// - WorkloadIPs: use workload endpoints to construct routes.
 	// - CalicoIPAM: the default - use IPAM data to construct routes.
 	RouteSource string `json:"routeSource,omitempty" validate:"omitempty,routeSource"`
 
-	// Calico programs additional Linux route tables for various purposes.  RouteTableRange
-	// specifies the indices of the route tables that Calico should use.
+	// Calico programs additional Linux route tables for various purposes.
+	// RouteTableRanges specifies a set of table index ranges that Calico should use.
+	// Deprecates`RouteTableRange`, overrides `RouteTableRange`.
+	RouteTableRanges *RouteTableRanges `json:"routeTableRanges,omitempty" validate:"omitempty,dive"`
+
+	// Deprecated in favor of RouteTableRanges.
+	// Calico programs additional Linux route tables for various purposes.
+	// RouteTableRange specifies the indices of the route tables that Calico should use.
 	RouteTableRange *RouteTableRange `json:"routeTableRange,omitempty" validate:"omitempty"`
 
 	// WireguardEnabled controls whether Wireguard is enabled. [Default: false]
@@ -400,12 +453,25 @@ type FelixConfigurationSpec struct {
 	// This should not match workload interfaces (usually named cali...).
 	// +optional
 	MTUIfacePattern string `json:"mtuIfacePattern,omitempty" validate:"omitempty,regexp"`
+
+	// FloatingIPs configures whether or not Felix will program floating IP addresses.
+	//
+	// +kubebuilder:default=Disabled
+	// +optional
+	FloatingIPs *FloatingIPType `json:"floatingIPs,omitempty" validate:"omitempty"`
 }
 
 type RouteTableRange struct {
 	Min int `json:"min"`
 	Max int `json:"max"`
 }
+
+type RouteTableIDRange struct {
+	Min int `json:"min"`
+	Max int `json:"max"`
+}
+
+type RouteTableRanges []RouteTableIDRange
 
 // ProtoPort is combination of protocol, port, and CIDR. Protocol and port must be specified.
 type ProtoPort struct {
