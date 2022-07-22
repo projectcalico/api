@@ -2346,7 +2346,7 @@ func schema_pkg_apis_projectcalico_v3_FelixConfigurationSpec(ref common.Referenc
 					},
 					"bpfExtToServiceConnmark": {
 						SchemaProps: spec.SchemaProps{
-							Description: "BPFExtToServiceConnmark in BPF mode, control a 32bit mark that is set on connections from an external client to a local service. This mark allows us to control how packets of that connection are routed within the host and how is routing intepreted by RPF check. [Default: 0]",
+							Description: "BPFExtToServiceConnmark in BPF mode, control a 32bit mark that is set on connections from an external client to a local service. This mark allows us to control how packets of that connection are routed within the host and how is routing interpreted by RPF check. [Default: 0]",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -2418,10 +2418,24 @@ func schema_pkg_apis_projectcalico_v3_FelixConfigurationSpec(ref common.Referenc
 							Format:      "int32",
 						},
 					},
+					"bpfMapSizeIfState": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BPFMapSizeIfState sets the size for ifstate map.  The ifstate map must be large enough to hold an entry for each device (host + workloads) on a host.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 					"bpfEnforceRPF": {
 						SchemaProps: spec.SchemaProps{
 							Description: "BPFEnforceRPF enforce strict RPF on all interfaces with BPF programs regardless of what is the per-interfaces or global setting. Possible values are Disabled or Strict. [Default: Strict]",
 							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"bpfPolicyDebugEnabled": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BPFPolicyDebugEnabled when true, Felix records detailed information about the BPF policy programs, which can be examined with the calico-bpf command-line tool.",
+							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},
@@ -2452,16 +2466,37 @@ func schema_pkg_apis_projectcalico_v3_FelixConfigurationSpec(ref common.Referenc
 							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.RouteTableRange"),
 						},
 					},
+					"routeSyncDisabled": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RouteSyncDisabled will disable all operations performed on the route table. Set to true to run in network-policy mode only.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 					"wireguardEnabled": {
 						SchemaProps: spec.SchemaProps{
-							Description: "WireguardEnabled controls whether Wireguard is enabled. [Default: false]",
+							Description: "WireguardEnabled controls whether Wireguard is enabled for IPv4 (encapsulating IPv4 traffic over an IPv4 underlay network). [Default: false]",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"wireguardEnabledV6": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WireguardEnabledV6 controls whether Wireguard is enabled for IPv6 (encapsulating IPv6 traffic over an IPv6 underlay network). [Default: false]",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},
 					"wireguardListeningPort": {
 						SchemaProps: spec.SchemaProps{
-							Description: "WireguardListeningPort controls the listening port used by Wireguard. [Default: 51820]",
+							Description: "WireguardListeningPort controls the listening port used by IPv4 Wireguard. [Default: 51820]",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"wireguardListeningPortV6": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WireguardListeningPortV6 controls the listening port used by IPv6 Wireguard. [Default: 51821]",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -2475,14 +2510,28 @@ func schema_pkg_apis_projectcalico_v3_FelixConfigurationSpec(ref common.Referenc
 					},
 					"wireguardInterfaceName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "WireguardInterfaceName specifies the name to use for the Wireguard interface. [Default: wg.calico]",
+							Description: "WireguardInterfaceName specifies the name to use for the IPv4 Wireguard interface. [Default: wireguard.cali]",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"wireguardInterfaceNameV6": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WireguardInterfaceNameV6 specifies the name to use for the IPv6 Wireguard interface. [Default: wg-v6.cali]",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"wireguardMTU": {
 						SchemaProps: spec.SchemaProps{
-							Description: "WireguardMTU controls the MTU on the Wireguard interface. See Configuring MTU [Default: 1420]",
+							Description: "WireguardMTU controls the MTU on the IPv4 Wireguard interface. See Configuring MTU [Default: 1440]",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"wireguardMTUV6": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WireguardMTUV6 controls the MTU on the IPv6 Wireguard interface. See Configuring MTU [Default: 1420]",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -10250,7 +10299,7 @@ func schema_k8sio_api_core_v1_PersistentVolumeClaimCondition(ref common.Referenc
 				Properties: map[string]spec.Schema{
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "\n\n\nPossible enum values:\n - `\"FileSystemResizePending\"` - controller resize is finished and a file system resize is pending on node\n - `\"Resizing\"` - a user trigger resize of pvc has been started",
+							Description: "Possible enum values:\n - `\"FileSystemResizePending\"` - controller resize is finished and a file system resize is pending on node\n - `\"Resizing\"` - a user trigger resize of pvc has been started",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
