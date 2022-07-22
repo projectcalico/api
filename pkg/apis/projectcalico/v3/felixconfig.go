@@ -367,7 +367,7 @@ type FelixConfigurationSpec struct {
 	BPFExternalServiceMode string `json:"bpfExternalServiceMode,omitempty" validate:"omitempty,bpfServiceMode"`
 	// BPFExtToServiceConnmark in BPF mode, control a 32bit mark that is set on connections from an
 	// external client to a local service. This mark allows us to control how packets of that
-	// connection are routed within the host and how is routing intepreted by RPF check. [Default: 0]
+	// connection are routed within the host and how is routing interpreted by RPF check. [Default: 0]
 	BPFExtToServiceConnmark *int `json:"bpfExtToServiceConnmark,omitempty" validate:"omitempty,gte=0,lte=4294967295"`
 	// BPFKubeProxyIptablesCleanupEnabled, if enabled in BPF mode, Felix will proactively clean up the upstream
 	// Kubernetes kube-proxy's iptables chains.  Should only be enabled if kube-proxy is not running.  [Default: true]
@@ -406,10 +406,16 @@ type FelixConfigurationSpec struct {
 	// for each endpoint matched by every selector in the source/destination matches in network policy.  Selectors
 	// such as "all()" can result in large numbers of entries (one entry per endpoint in that case).
 	BPFMapSizeIPSets *int `json:"bpfMapSizeIPSets,omitempty"`
+	// BPFMapSizeIfState sets the size for ifstate map.  The ifstate map must be large enough to hold an entry
+	// for each device (host + workloads) on a host.
+	BPFMapSizeIfState *int `json:"bpfMapSizeIfState,omitempty"`
 	// BPFEnforceRPF enforce strict RPF on all interfaces with BPF programs regardless of
 	// what is the per-interfaces or global setting. Possible values are Disabled or
 	// Strict. [Default: Strict]
 	BPFEnforceRPF string `json:"bpfEnforceRPF,omitempty"`
+	// BPFPolicyDebugEnabled when true, Felix records detailed information
+	// about the BPF policy programs, which can be examined with the calico-bpf command-line tool.
+	BPFPolicyDebugEnabled *bool `json:"bpfPolicyDebugEnabled,omitempty"`
 	// RouteSource configures where Felix gets its routing information.
 	// - WorkloadIPs: use workload endpoints to construct routes.
 	// - CalicoIPAM: the default - use IPAM data to construct routes.
@@ -425,16 +431,28 @@ type FelixConfigurationSpec struct {
 	// RouteTableRange specifies the indices of the route tables that Calico should use.
 	RouteTableRange *RouteTableRange `json:"routeTableRange,omitempty" validate:"omitempty"`
 
-	// WireguardEnabled controls whether Wireguard is enabled. [Default: false]
+	// RouteSyncDisabled will disable all operations performed on the route table. Set to true to
+	// run in network-policy mode only.
+	RouteSyncDisabled *bool `json:"routeSyncDisabled,omitempty"`
+
+	// WireguardEnabled controls whether Wireguard is enabled for IPv4 (encapsulating IPv4 traffic over an IPv4 underlay network). [Default: false]
 	WireguardEnabled *bool `json:"wireguardEnabled,omitempty"`
-	// WireguardListeningPort controls the listening port used by Wireguard. [Default: 51820]
+	// WireguardEnabledV6 controls whether Wireguard is enabled for IPv6 (encapsulating IPv6 traffic over an IPv6 underlay network). [Default: false]
+	WireguardEnabledV6 *bool `json:"wireguardEnabledV6,omitempty"`
+	// WireguardListeningPort controls the listening port used by IPv4 Wireguard. [Default: 51820]
 	WireguardListeningPort *int `json:"wireguardListeningPort,omitempty" validate:"omitempty,gt=0,lte=65535"`
+	// WireguardListeningPortV6 controls the listening port used by IPv6 Wireguard. [Default: 51821]
+	WireguardListeningPortV6 *int `json:"wireguardListeningPortV6,omitempty" validate:"omitempty,gt=0,lte=65535"`
 	// WireguardRoutingRulePriority controls the priority value to use for the Wireguard routing rule. [Default: 99]
 	WireguardRoutingRulePriority *int `json:"wireguardRoutingRulePriority,omitempty" validate:"omitempty,gt=0,lt=32766"`
-	// WireguardInterfaceName specifies the name to use for the Wireguard interface. [Default: wg.calico]
+	// WireguardInterfaceName specifies the name to use for the IPv4 Wireguard interface. [Default: wireguard.cali]
 	WireguardInterfaceName string `json:"wireguardInterfaceName,omitempty" validate:"omitempty,interface"`
-	// WireguardMTU controls the MTU on the Wireguard interface. See Configuring MTU [Default: 1420]
+	// WireguardInterfaceNameV6 specifies the name to use for the IPv6 Wireguard interface. [Default: wg-v6.cali]
+	WireguardInterfaceNameV6 string `json:"wireguardInterfaceNameV6,omitempty" validate:"omitempty,interface"`
+	// WireguardMTU controls the MTU on the IPv4 Wireguard interface. See Configuring MTU [Default: 1440]
 	WireguardMTU *int `json:"wireguardMTU,omitempty"`
+	// WireguardMTUV6 controls the MTU on the IPv6 Wireguard interface. See Configuring MTU [Default: 1420]
+	WireguardMTUV6 *int `json:"wireguardMTUV6,omitempty"`
 	// WireguardHostEncryptionEnabled controls whether Wireguard host-to-host encryption is enabled. [Default: false]
 	WireguardHostEncryptionEnabled *bool `json:"wireguardHostEncryptionEnabled,omitempty"`
 	// WireguardKeepAlive controls Wireguard PersistentKeepalive option. Set 0 to disable. [Default: 0]
@@ -478,6 +496,15 @@ type RouteTableIDRange struct {
 }
 
 type RouteTableRanges []RouteTableIDRange
+
+func (r RouteTableRanges) NumDesignatedTables() int {
+	var len int = 0
+	for _, rng := range r {
+		len += (rng.Max - rng.Min) + 1 // add one, since range is inclusive
+	}
+
+	return len
+}
 
 // ProtoPort is combination of protocol, port, and CIDR. Protocol and port must be specified.
 type ProtoPort struct {

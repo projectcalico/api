@@ -1132,6 +1132,16 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 		*out = new(int)
 		**out = **in
 	}
+	if in.BPFMapSizeIfState != nil {
+		in, out := &in.BPFMapSizeIfState, &out.BPFMapSizeIfState
+		*out = new(int)
+		**out = **in
+	}
+	if in.BPFPolicyDebugEnabled != nil {
+		in, out := &in.BPFPolicyDebugEnabled, &out.BPFPolicyDebugEnabled
+		*out = new(bool)
+		**out = **in
+	}
 	if in.RouteTableRanges != nil {
 		in, out := &in.RouteTableRanges, &out.RouteTableRanges
 		*out = new(RouteTableRanges)
@@ -1146,13 +1156,28 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 		*out = new(RouteTableRange)
 		**out = **in
 	}
+	if in.RouteSyncDisabled != nil {
+		in, out := &in.RouteSyncDisabled, &out.RouteSyncDisabled
+		*out = new(bool)
+		**out = **in
+	}
 	if in.WireguardEnabled != nil {
 		in, out := &in.WireguardEnabled, &out.WireguardEnabled
 		*out = new(bool)
 		**out = **in
 	}
+	if in.WireguardEnabledV6 != nil {
+		in, out := &in.WireguardEnabledV6, &out.WireguardEnabledV6
+		*out = new(bool)
+		**out = **in
+	}
 	if in.WireguardListeningPort != nil {
 		in, out := &in.WireguardListeningPort, &out.WireguardListeningPort
+		*out = new(int)
+		**out = **in
+	}
+	if in.WireguardListeningPortV6 != nil {
+		in, out := &in.WireguardListeningPortV6, &out.WireguardListeningPortV6
 		*out = new(int)
 		**out = **in
 	}
@@ -1163,6 +1188,11 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 	}
 	if in.WireguardMTU != nil {
 		in, out := &in.WireguardMTU, &out.WireguardMTU
+		*out = new(int)
+		**out = **in
+	}
+	if in.WireguardMTUV6 != nil {
+		in, out := &in.WireguardMTUV6, &out.WireguardMTUV6
 		*out = new(int)
 		**out = **in
 	}
