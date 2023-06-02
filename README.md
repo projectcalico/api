@@ -1,11 +1,6 @@
 # projectcalico/api
 
-This repository is a mirror of the canonical home for Calico API definitions.
-
-It is recommended to use this repository for projects which use the Calico API, so as to avoid importing the full Calico source code.
-
-To make changes to the Calico API, you must first submit a PR against [github.com/projectcalico/calico/api](https://github.com/projectcalico/calico).
-Once merged, changes will be mirrored to this repository for consumption.
+This is canonical source for API definitions of Projectcalico.
 
 ## How to use
 
