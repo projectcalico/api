@@ -151,6 +151,93 @@ endif
 GO_BUILD_IMAGE ?= calico/go-build
 CALICO_BUILD    = $(GO_BUILD_IMAGE):$(GO_BUILD_VER)
 
+
+# We use BoringCrypto as FIPS validated cryptography in order to allow users to run in FIPS Mode (amd64 only).
+ifeq ($(ARCH), $(filter $(ARCH),amd64))
+GOEXPERIMENT?=boringcrypto
+TAGS?=boringcrypto,osusergo,netgo
+CGO_ENABLED?=1
+else
+CGO_ENABLED?=0
+endif
+
+# Build a static binary with boring crypto support.
+# This function expects you to pass in two arguments:
+#   1st arg: path/to/input/package(s)
+#   2nd arg: path/to/output/binary
+# Only when arch = amd64 it will use boring crypto to build the binary.
+# Uses LDFLAGS, CGO_LDFLAGS, CGO_CFLAGS when set.
+# Tests that the resulting binary contains boringcrypto symbols.
+define build_static_cgo_boring_binary
+    $(DOCKER_RUN) \
+        -e CGO_ENABLED=1 \
+        -e CGO_LDFLAGS=$(CGO_LDFLAGS) \
+        -e CGO_CFLAGS=$(CGO_CFLAGS) \
+        $(GO_BUILD_IMAGE):$(GO_BUILD_VER) \
+        sh -c '$(GIT_CONFIG_SSH) \
+            GOEXPERIMENT=boringcrypto go build -o $(2)  \
+            -tags fipsstrict,osusergo,netgo -v -buildvcs=false \
+            -ldflags "$(LDFLAGS) -linkmode external -extldflags -static" \
+            $(1) \
+            && go tool nm $(2) | grep '_Cfunc__goboringcrypto_' 1> /dev/null'
+endef
+
+# Build a binary with boring crypto support.
+# This function expects you to pass in two arguments:
+#   1st arg: path/to/input/package(s)
+#   2nd arg: path/to/output/binary
+# Only when arch = amd64 it will use boring crypto to build the binary.
+# Uses LDFLAGS, CGO_LDFLAGS, CGO_CFLAGS when set.
+# Tests that the resulting binary contains boringcrypto symbols.
+define build_cgo_boring_binary
+    $(DOCKER_RUN) \
+        -e CGO_ENABLED=1 \
+        -e CGO_LDFLAGS=$(CGO_LDFLAGS) \
+        -e CGO_CFLAGS=$(CGO_CFLAGS) \
+        $(GO_BUILD_IMAGE):$(GO_BUILD_VER) \
+        sh -c '$(GIT_CONFIG_SSH) \
+            GOEXPERIMENT=boringcrypto go build -o $(2)  \
+            -tags fipsstrict -v -buildvcs=false \
+            -ldflags "$(LDFLAGS)" \
+            $(1) \
+            && go tool nm $(2) | grep '_Cfunc__goboringcrypto_' 1> /dev/null'
+endef
+
+# Use this when building binaries that need cgo, but have no crypto and therefore would not contain any boring symbols.
+define build_cgo_binary
+    $(DOCKER_RUN) \
+        -e CGO_ENABLED=1 \
+        -e CGO_LDFLAGS=$(CGO_LDFLAGS) \
+        -e CGO_CFLAGS=$(CGO_CFLAGS) \
+        $(GO_BUILD_IMAGE):$(GO_BUILD_VER) \
+        sh -c '$(GIT_CONFIG_SSH) \
+            go build -o $(2)  \
+            -v -buildvcs=false \
+            -ldflags "$(LDFLAGS)" \
+            $(1)'
+endef
+
+# For binaries that do not require boring crypto.
+define build_binary
+	$(DOCKER_RUN) $(GO_BUILD_IMAGE):$(GO_BUILD_VER) \
+		sh -c '$(GIT_CONFIG_SSH) \
+		go build -o $(2)  \
+		-v -buildvcs=false \
+		-ldflags "$(LDFLAGS)" \
+		$(1)'
+endef
+
+# For binaries that do not require boring crypto.
+define build_static_binary
+        $(DOCKER_RUN) $(GO_BUILD_IMAGE):$(GO_BUILD_VER) \
+                sh -c '$(GIT_CONFIG_SSH) \
+                go build -o $(2)  \
+                -v -buildvcs=false \
+                -ldflags "$(LDFLAGS) -linkmode external -extldflags -static" \
+                $(1)'
+endef
+
+
 # Images used in build / test across multiple directories.
 PROTOC_CONTAINER=calico/protoc:$(PROTOC_VER)-$(BUILDARCH)
 ETCD_IMAGE ?= quay.io/coreos/etcd:$(ETCD_VERSION)-$(ARCH)
@@ -233,6 +320,9 @@ TARGET_PLATFORM=--platform=linux/arm/v7
 endif
 ifeq ($(ARCH),ppc64le)
 TARGET_PLATFORM=--platform=linux/ppc64le
+endif
+ifeq ($(ARCH),s390x)
+TARGET_PLATFORM=--platform=linux/s390x
 endif
 
 # DOCKER_BUILD is the base build command used for building all images.
@@ -407,8 +497,13 @@ git-commit:
 # different implementation.
 ###############################################################################
 
+ifdef LOCAL_CRANE
+CRANE_CMD         = bash -c $(double_quote)crane
+else
 CRANE_CMD         = docker run -t --entrypoint /bin/sh -v $(DOCKER_CONFIG):/root/.docker/config.json $(CALICO_BUILD) -c \
                     $(double_quote)crane
+endif
+
 GIT_CMD           = git
 DOCKER_CMD        = docker
 
@@ -809,7 +904,7 @@ retag-build-images-with-registry-%:
 # retag-build-image-with-registry-% retags the build arch images specified by $* and VALIDARCHES with the
 # registry specified by REGISTRY.
 retag-build-image-with-registry-%: var-require-all-REGISTRY-BUILD_IMAGES
-	$(MAKE) $(addprefix retag-build-image-arch-with-registry-,$(VALIDARCHES)) BUILD_IMAGE=$(call unescapefs,$*)
+	$(MAKE) -j12 $(addprefix retag-build-image-arch-with-registry-,$(VALIDARCHES)) BUILD_IMAGE=$(call unescapefs,$*)
 
 # retag-build-image-arch-with-registry-% retags the build / arch image specified by $* and BUILD_IMAGE with the
 # registry specified by REGISTRY.
@@ -832,13 +927,13 @@ push-images-to-registry-%:
 # push-image-to-registry-% pushes the build / arch images specified by $* and VALIDARCHES to the registry
 # specified by REGISTRY.
 push-image-to-registry-%:
-	$(MAKE) $(addprefix push-image-arch-to-registry-,$(VALIDARCHES)) BUILD_IMAGE=$(call unescapefs,$*)
+	$(MAKE) -j6 $(addprefix push-image-arch-to-registry-,$(VALIDARCHES)) BUILD_IMAGE=$(call unescapefs,$*)
 
 # push-image-arch-to-registry-% pushes the build / arch image specified by $* and BUILD_IMAGE to the registry
 # specified by REGISTRY.
 push-image-arch-to-registry-%:
 # If the registry we want to push to doesn't not support manifests don't push the ARCH image.
-	$(DOCKER) push $(call filter-registry,$(REGISTRY))$(BUILD_IMAGE):$(IMAGETAG)-$*
+	$(DOCKER) push --quiet $(call filter-registry,$(REGISTRY))$(BUILD_IMAGE):$(IMAGETAG)-$*
 	$(if $(filter $*,amd64),\
 		$(DOCKER) push $(REGISTRY)/$(BUILD_IMAGE):$(IMAGETAG),\
 		$(NOECHO) $(NOOP)\
@@ -1118,6 +1213,13 @@ check-dirty:
 	@if [ "$$(git --no-pager diff --stat)" != "" ]; then \
 	echo "The following files are dirty"; git --no-pager diff --stat; exit 1; fi
 
+bin/yq:
+	mkdir -p bin
+	$(eval TMP := $(shell mktemp -d))
+	wget https://github.com/mikefarah/yq/releases/download/v4.34.2/yq_linux_$(BUILDARCH).tar.gz -O $(TMP)/yq4.tar.gz
+	tar -zxvf $(TMP)/yq4.tar.gz -C $(TMP)
+	mv $(TMP)/yq_linux_$(BUILDARCH) bin/yq
+
 ###############################################################################
 # Common functions for launching a local Kubernetes control plane.
 ###############################################################################
@@ -1209,7 +1311,7 @@ $(REPO_ROOT)/.$(KIND_NAME).created: $(KUBECTL) $(KIND)
 		--config $(KIND_CONFIG) \
 		--kubeconfig $(KIND_KUBECONFIG) \
 		--name $(KIND_NAME) \
-		--image kindest/node:$(K8S_VERSION)
+		--image kindest/node:$(KINDEST_NODE_VERSION)
 
 	# Wait for controller manager to be running and healthy, then create Calico CRDs.
 	while ! KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) get serviceaccount default; do echo "Waiting for default serviceaccount to be created..."; sleep 2; done
@@ -1234,7 +1336,7 @@ kubectl $(KUBECTL):
 bin/helm:
 	mkdir -p bin
 	$(eval TMP := $(shell mktemp -d))
-	wget -q https://get.helm.sh/helm-v3.3.1-linux-amd64.tar.gz -O $(TMP)/helm3.tar.gz
+	wget -q https://get.helm.sh/helm-v3.11.0-linux-amd64.tar.gz -O $(TMP)/helm3.tar.gz
 	tar -zxvf $(TMP)/helm3.tar.gz -C $(TMP)
 	mv $(TMP)/linux-amd64/helm bin/helm
 
