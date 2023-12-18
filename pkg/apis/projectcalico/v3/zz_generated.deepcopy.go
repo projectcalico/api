@@ -1296,9 +1296,30 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.BPFLogFilters != nil {
+		in, out := &in.BPFLogFilters, &out.BPFLogFilters
+		*out = new(map[string]string)
+		if **in != nil {
+			in, out := *in, *out
+			*out = make(map[string]string, len(*in))
+			for key, val := range *in {
+				(*out)[key] = val
+			}
+		}
+	}
 	if in.BPFConnectTimeLoadBalancingEnabled != nil {
 		in, out := &in.BPFConnectTimeLoadBalancingEnabled, &out.BPFConnectTimeLoadBalancingEnabled
 		*out = new(bool)
+		**out = **in
+	}
+	if in.BPFConnectTimeLoadBalancing != nil {
+		in, out := &in.BPFConnectTimeLoadBalancing, &out.BPFConnectTimeLoadBalancing
+		*out = new(BPFConnectTimeLBType)
+		**out = **in
+	}
+	if in.BPFHostNetworkedNATWithoutCTLB != nil {
+		in, out := &in.BPFHostNetworkedNATWithoutCTLB, &out.BPFHostNetworkedNATWithoutCTLB
+		*out = new(BPFHostNetworkedNATType)
 		**out = **in
 	}
 	if in.BPFDSROptoutCIDRs != nil {
@@ -1380,6 +1401,15 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.BPFForceTrackPacketsFromIfaces != nil {
+		in, out := &in.BPFForceTrackPacketsFromIfaces, &out.BPFForceTrackPacketsFromIfaces
+		*out = new([]string)
+		if **in != nil {
+			in, out := *in, *out
+			*out = make([]string, len(*in))
+			copy(*out, *in)
+		}
+	}
 	if in.RouteTableRanges != nil {
 		in, out := &in.RouteTableRanges, &out.RouteTableRanges
 		*out = new(RouteTableRanges)
@@ -1452,6 +1482,11 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 	if in.FloatingIPs != nil {
 		in, out := &in.FloatingIPs, &out.FloatingIPs
 		*out = new(FloatingIPType)
+		**out = **in
+	}
+	if in.WindowsManageFirewallRules != nil {
+		in, out := &in.WindowsManageFirewallRules, &out.WindowsManageFirewallRules
+		*out = new(WindowsManageFirewallRulesMode)
 		**out = **in
 	}
 	return
@@ -1552,6 +1587,11 @@ func (in *GlobalNetworkPolicySpec) DeepCopyInto(out *GlobalNetworkPolicySpec) {
 	if in.Types != nil {
 		in, out := &in.Types, &out.Types
 		*out = make([]PolicyType, len(*in))
+		copy(*out, *in)
+	}
+	if in.PerformanceHints != nil {
+		in, out := &in.PerformanceHints, &out.PerformanceHints
+		*out = make([]PolicyPerformanceHint, len(*in))
 		copy(*out, *in)
 	}
 	return
@@ -2306,6 +2346,11 @@ func (in *NetworkPolicySpec) DeepCopyInto(out *NetworkPolicySpec) {
 	if in.Types != nil {
 		in, out := &in.Types, &out.Types
 		*out = make([]PolicyType, len(*in))
+		copy(*out, *in)
+	}
+	if in.PerformanceHints != nil {
+		in, out := &in.PerformanceHints, &out.PerformanceHints
+		*out = make([]PolicyPerformanceHint, len(*in))
 		copy(*out, *in)
 	}
 	return
