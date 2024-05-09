@@ -305,6 +305,14 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
 	EndpointReportingDelay *metav1.Duration `json:"endpointReportingDelay,omitempty" configv1timescale:"seconds" confignamev1:"EndpointReportingDelaySecs"`
 
+	// EndpointStatusPathPrefix is the path to the directory
+	// where endpoint status will be written. Endpoint status
+	// file reporting is disabled if field is left empty.
+	//
+	// Chosen directory should match the directory used by the CNI for PodStartupDelay.
+	// [Default: ""]
+	EndpointStatusPathPrefix string `json:"endpointStatusPathPrefix,omitempty"`
+
 	// IptablesMarkMask is the mask that Felix selects its IPTables Mark bits from. Should be a 32 bit hexadecimal
 	// number with at least 8 bits set, none of which clash with any other mark bits in use on the system.
 	// [Default: 0xff000000]
@@ -408,6 +416,15 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
 	DebugSimulateDataplaneHangAfter *metav1.Duration `json:"debugSimulateDataplaneHangAfter,omitempty" configv1timescale:"seconds"`
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
+	DebugSimulateDataplaneApplyDelay *metav1.Duration `json:"debugSimulateDataplaneApplyDelay,omitempty" configv1timescale:"seconds"`
+	// DebugHost is the host IP or hostname to bind the debug port to.  Only used
+	// if DebugPort is set. [Default:localhost]
+	DebugHost *string `json:"debugHost,omitempty"`
+	// DebugPort if set, enables Felix's debug HTTP port, which allows memory and CPU profiles
+	// to be retrieved.  The debug port is not secure, it should not be exposed to the internet.
+	DebugPort *int `json:"debugPort,omitempty" validate:"omitempty,gte=0,lte=65535"`
 
 	IptablesNATOutgoingInterfaceFilter string `json:"iptablesNATOutgoingInterfaceFilter,omitempty" validate:"omitempty,ifaceFilter"`
 
@@ -496,8 +513,9 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
 	BPFKubeProxyMinSyncPeriod *metav1.Duration `json:"bpfKubeProxyMinSyncPeriod,omitempty" validate:"omitempty" configv1timescale:"seconds"`
-	// BPFKubeProxyEndpointSlicesEnabled in BPF mode, controls whether Felix's
-	// embedded kube-proxy accepts EndpointSlices or not.
+	// BPFKubeProxyEndpointSlicesEnabled is deprecated and has no effect. BPF
+	// kube-proxy always accepts endpoint slices. This option will be removed in
+	// the next release.
 	BPFKubeProxyEndpointSlicesEnabled *bool `json:"bpfKubeProxyEndpointSlicesEnabled,omitempty" validate:"omitempty"`
 	// BPFPSNATPorts sets the range from which we randomly pick a port if there is a source port
 	// collision. This should be within the ephemeral range as defined by RFC 6056 (1024–65535) and
@@ -549,6 +567,10 @@ type FelixConfigurationSpec struct {
 	// BPFDisableGROForIfaces is a regular expression that controls which interfaces Felix should disable the
 	// Generic Receive Offload [GRO] option.  It should not match the workload interfaces (usually named cali...).
 	BPFDisableGROForIfaces string `json:"bpfDisableGROForIfaces,omitempty" validate:"omitempty,regexp"`
+	// BPFExcludeCIDRsFromNAT is a list of CIDRs that are to be excluded from NAT
+	// resolution so that host can handle them. A typical usecase is node local
+	// DNS cache.
+	BPFExcludeCIDRsFromNAT *[]string `json:"bpfExcludeCIDRsFromNAT,omitempty" validate:"omitempty,cidrs"`
 
 	// RouteSource configures where Felix gets its routing information.
 	// - WorkloadIPs: use workload endpoints to construct routes.
