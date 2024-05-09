@@ -3,19 +3,19 @@
 #################################################################################################
 
 # The version of github.com/projectcalico/go-build to use.
-GO_BUILD_VER = v0.90
+GO_BUILD_VER=v0.91
 # Env var to ACK Ginkgo deprecation warnings, may need updating with go-build.
 ACK_GINKGO=ACK_GINKGO_DEPRECATIONS=1.16.5
 
 # Version of Kubernetes to use for tests, bitnami/kubectl, and kubectl binary release.
-K8S_VERSION=v1.27.8
+K8S_VERSION=v1.28.7
 
 # Version of various tools used in the build and tests.
 COREDNS_VERSION=1.5.2
 ETCD_VERSION=v3.5.6
-# FIXME upgrading to kindest/node newer than v1.24.7 causes Node/kind-cluster and sig-network conformance
-# tests to timeout or fail.
-KINDEST_NODE_VERSION=v1.24.7
+HELM_VERSION=v3.11.3
+KINDEST_NODE_VERSION=v1.27.11
+KIND_VERSION=v0.22.0
 PROTOC_VER=v0.1
 UBI_VERSION=8.9
 
@@ -26,7 +26,7 @@ ORGANIZATION = projectcalico
 GIT_USE_SSH = true
 
 # The version of BIRD to use for calico/node builds and confd tests.
-BIRD_VERSION=v0.3.3-206-g0f4d6086
+BIRD_VERSION=v0.3.3-208-g1e2ff99d
 
 # DEV_REGISTRIES configures the container image registries which are built from this
 # repository. By default, just build images with calico/. Allow this variable to be overridden,
