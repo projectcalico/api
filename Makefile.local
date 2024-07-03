@@ -2,23 +2,143 @@
 # specific to github.com/projectcalico/api. This is opposed to Makefile, which
 # is mirrored from github.com/projectcalico/calico/api.
 
+SHELL = /bin/bash
+
+# Local variables
+
+# We assume our git branch will match the upstream
+# git branch we're pulling API updates from, but
+# we can override this if we ever need to.
+GIT_BRANCH := $(shell git branch --show-current)
+CALICO_GIT_REF ?= $(GIT_BRANCH)
+
+# The calico version that this branch is for. If we're on
+# master, the sed regex does nothing; otherwise, it will
+# extract the version number from the branch name.
+CALICO_VERSION := $(shell git branch --show-current | sed -E -e 's/release-//')
+
+# We auto-generate the branch name based on the branch we're
+# on now; if we already have a branch for this version, we don't
+# want to create a new branch/PR, just update the current one.
+PR_BRANCH := auto_api_update_$(CALICO_VERSION)
+
+# The organization that we want to push our branch to (for PRs);
+# you can override this to your own account if you have a fork
+# but your repository (and `gh`) need to be configured for it
+# ahead of time.
+ORGANIZATION := projectcalico
+
+# The upstream repository name (which we're going to pull API
+# files from).
+CALICO_REPOSITORY_NAME := projectcalico/calico
+
+# The temporary directory we're going to clone to. This is going
+# to get removed if it exists already.
+CALICO_TEMP_DIR := /tmp/calico-api-mirror
+
+# List of files that we should keep even if they've changed upstream;
+# At the moment, we keep the README because this repository has
+# its own README; the upstream one isn't relevant to this repository.
+KEEP_LOCAL_FILES := README.md
+
+# The commit message/PR title to use when we commit our changes
+COMMIT_MESSAGE_TITLE := Automatic API update from $(CALICO_REPOSITORY_NAME) $(CALICO_VERSION)
+
+# A list of variables that we want to print out when we
+# run `make variables`; this is to ensure that users (or
+# automated jobs, down the road) can see clearly
+# what defaults we're using.
+VERBOSE_LOCAL_VARIABLES = GIT_BRANCH CALICO_GIT_REF PR_BRANCH CALICO_TEMP_DIR CALICO_REPOSITORY_NAME
+
+help:
+	$(info Calico API local Makefile)
+	$(info )
+	$(info Targets:)
+	$(info * variables:   Print the current, most relevant local variables)
+	$(info * update:      Clone upstream calico and bring their API files in)
+	$(info * pr:          Pulls changes from upstream calico, commits them, and creates a new PR for them.)
+	true
+
+variables:
+	$(foreach localvar,$(VERBOSE_LOCAL_VARIABLES),$(info $(localvar) = $($(localvar))))
+	true
+
+# Mark all of our rules as PHONY, since they are
+.PHONY: check-dirty commit-remote-api help pr pull-upstream-changes restore-local-files show-pr-url update variables
+
+# .SILENT will cause the Makefile rule not to be echoed as it is run
+.SILENT: check-dirty commit-remote-api help pr pull-upstream-changes restore-local-files show-pr-url update variables
+
 # update pulls in the latest contents of this repository from the upstream
 # github.com/projectcalico/calico/api directory.
-CALICO_VERSION ?= $(shell git rev-parse --abbrev-ref HEAD)
-update: check-dirty
+update: check-dirty pull-upstream-changes restore-local-files
+
+# pr runs the above update target (to make sure), then commits the changes
+# to a branch upstream, creates the PR, and shows the URL.
+pr: update commit-remote-api show-pr-url
+
+# Clones the upstream repository (at $(CALICO_REPOSITORY_NAME)) and
+# then pulls in changes from there to this repository. Does not commit
+# any changes.
+pull-upstream-changes:
 	# Clone a temporary copy of the Calico repo at the given version.
-	rm -rf /tmp/calico-api-mirror
-	mkdir -p /tmp/calico-api-mirror
-	git clone --depth 1 git@github.com:projectcalico/calico.git -b $(CALICO_VERSION) /tmp/calico-api-mirror
+	$(info Cloning git@github.com:$(CALICO_REPOSITORY_NAME).git into $(CALICO_TEMP_DIR))
+	rm -rf $(CALICO_TEMP_DIR)
+	mkdir -p $(CALICO_TEMP_DIR)
+	git clone --quiet --depth 1 git@github.com:$(CALICO_REPOSITORY_NAME).git -b $(CALICO_GIT_REF) $(CALICO_TEMP_DIR)
+
 	# Remove local files - we'll add them back from the Calico repo's contents.
 	rm -r pkg/ build/ examples/ hack/
-	# Add in files from the Calico repo.
-	cp -r /tmp/calico-api-mirror/api/. .
-	cp /tmp/calico-api-mirror/lib.Makefile .
-	cp /tmp/calico-api-mirror/metadata.mk .
-	# Some files, we want to keep the local versions of. 
-	# For example, README content is different between the two locations.
-	git checkout Makefile.local README.md
 
+	# Add in files from the Calico repo.
+	cp -r $(CALICO_TEMP_DIR)/api/. .
+	cp $(CALICO_TEMP_DIR)/lib.Makefile .
+	cp $(CALICO_TEMP_DIR)/metadata.mk .
+
+# Restores any files that we want to keep even if they're different
+# upstream. For example, `README.md` is different in this repository
+# than the equivalent file in the upstream repository.
+restore-local-files:
+	$(info Restoring locally-kept file(s): $(KEEP_LOCAL_FILES))
+	git checkout --quiet $(KEEP_LOCAL_FILES)
+
+# Validates whether or not the repository is dirty; errors if there are
+# local changes.
 check-dirty:
 	git diff --quiet || (echo "Repository has local changes" && exit 1)
+
+# Shows the URL of the upstream pull request (if it exists, or an error otherwise)
+show-pr-url:
+	$(info )
+	$(info ** PR can be viewed at $(shell \
+		gh pr list --head $(ORGANIZATION):$(PR_BRANCH) --json url --jq '.[0].url' | \
+		grep -q '.' || \
+		echo '[error: no PR found]' \
+		) **)
+	$(info )
+	true
+
+# Takes the changes that have been made so far and commits them, pushes
+# them to a remote branch, then creates a PR for them if there isn't one already.
+#
+# Note that this target does not depend on `restore-local-files`; this is to allow
+# for local changes to be made before being committed (e.g. if you wanted to also
+# update the README.md file in this PR). Be aware that any local changes which exist
+# will be committed here!
+commit-remote-api:
+	$(info Creating new branch $(PR_BRANCH), committing changes to it, and creating a PR for it)
+	echo "* Creating new branch"
+	git switch --quiet -C $(PR_BRANCH)
+	git add .
+	git reset -q Makefile.local
+	echo "* Committing changes to branch"
+	git commit --quiet --message="$(COMMIT_MESSAGE_TITLE)"
+	echo "* Pushing changes"
+	git push --quiet -f origin $(PR_BRANCH)
+	echo "* Creating PR (if it does not exist already)"
+	gh pr create --assignee '@me' --base $(GIT_BRANCH) --head $(ORGANIZATION):$(PR_BRANCH) \
+		--reviewer "projectcalico/release-team" \
+		--fill || \
+		echo -e "\n** A failure indicating an existing pull request is fine! We will have updated that one instead of creating a new one!" && \
+		true
+	git switch --quiet $(GIT_BRANCH)
