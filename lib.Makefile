@@ -24,6 +24,11 @@ ifeq ($(ARCHES),)
 	ARCHES=$(patsubst Dockerfile.%,%,$(wildcard Dockerfile.*))
 endif
 
+# If architectures cannot infer from Dockerfiles, set default supported architecture.
+ifeq ($(ARCHES),)
+	ARCHES=amd64 arm64 ppc64le s390x
+endif
+
 # list of arches *not* to build when doing *-all
 EXCLUDEARCH?=
 VALIDARCHES = $(filter-out $(EXCLUDEARCH),$(ARCHES))
@@ -257,23 +262,13 @@ GOARCH_FLAGS :=-e GOARCH=$(ARCH)
 REPO_ROOT := $(shell git rev-parse --show-toplevel)
 CERTS_PATH := $(REPO_ROOT)/hack/test/certs
 
-# Set the platform correctly for building docker images so that
-# cross-builds get the correct architecture set in the produced images.
-ifeq ($(ARCH),arm64)
-TARGET_PLATFORM=--platform=linux/arm64/v8
-endif
-ifeq ($(ARCH),ppc64le)
-TARGET_PLATFORM=--platform=linux/ppc64le
-endif
-ifeq ($(ARCH),s390x)
-TARGET_PLATFORM=--platform=linux/s390x
-endif
+QEMU_IMAGE ?= calico/qemu-user-static:latest
 
 # DOCKER_BUILD is the base build command used for building all images.
-DOCKER_BUILD=docker buildx build --pull \
-	     --build-arg QEMU_IMAGE=$(CALICO_BUILD) \
+DOCKER_BUILD=docker buildx build --load --platform=linux/$(ARCH) --pull \
+	     --build-arg QEMU_IMAGE=$(QEMU_IMAGE) \
 	     --build-arg UBI_IMAGE=$(UBI_IMAGE) \
-	     --build-arg GIT_VERSION=$(GIT_VERSION) $(TARGET_PLATFORM)
+	     --build-arg GIT_VERSION=$(GIT_VERSION)
 
 DOCKER_RUN := mkdir -p ../.go-pkg-cache bin $(GOMOD_CACHE) && \
 	docker run --rm \
@@ -288,22 +283,6 @@ DOCKER_RUN := mkdir -p ../.go-pkg-cache bin $(GOMOD_CACHE) && \
 		-e GOOS=$(BUILDOS) \
 		-e GOFLAGS=$(GOFLAGS) \
 		-v $(REPO_ROOT):/go/src/github.com/projectcalico/calico:rw \
-		-v $(REPO_ROOT)/.go-pkg-cache:/go-cache:rw \
-		-w /go/src/$(PACKAGE_NAME)
-
-DOCKER_RUN_RO := mkdir -p .go-pkg-cache bin $(GOMOD_CACHE) && \
-	docker run --rm \
-		--net=host \
-		--init \
-		$(EXTRA_DOCKER_ARGS) \
-		-e LOCAL_USER_ID=$(LOCAL_USER_ID) \
-		-e GOCACHE=/go-cache \
-		$(GOARCH_FLAGS) \
-		-e GOPATH=/go \
-		-e OS=$(BUILDOS) \
-		-e GOOS=$(BUILDOS) \
-		-e GOFLAGS=$(GOFLAGS) \
-		-v $(REPO_ROOT):/go/src/github.com/projectcalico/calico:ro \
 		-v $(REPO_ROOT)/.go-pkg-cache:/go-cache:rw \
 		-w /go/src/$(PACKAGE_NAME)
 
@@ -882,11 +861,15 @@ sub-manifest-%:
 	$(DOCKER) manifest create $(call unescapefs,$*):$(IMAGETAG) $(addprefix --amend ,$(addprefix $(call unescapefs,$*):$(IMAGETAG)-,$(VALIDARCHES)))
 	$(DOCKER) manifest push --purge $(call unescapefs,$*):$(IMAGETAG)
 
+push-manifests-with-tag: var-require-one-of-CONFIRM-DRYRUN var-require-all-BRANCH_NAME
+	$(MAKE) push-manifests IMAGETAG=$(if $(IMAGETAG_PREFIX),$(IMAGETAG_PREFIX)-)$(BRANCH_NAME) EXCLUDEARCH="$(EXCLUDEARCH)"
+	$(MAKE) push-manifests IMAGETAG=$(if $(IMAGETAG_PREFIX),$(IMAGETAG_PREFIX)-)$(GIT_VERSION) EXCLUDEARCH="$(EXCLUDEARCH)"
+
 # cd-common tags and pushes images with the branch name and git version. This target uses PUSH_IMAGES, BUILD_IMAGE,
 # and BRANCH_NAME env variables to figure out what to tag and where to push it to.
 cd-common: var-require-one-of-CONFIRM-DRYRUN var-require-all-BRANCH_NAME
-	$(MAKE) retag-build-images-with-registries push-images-to-registries push-manifests IMAGETAG=$(if $(IMAGETAG_PREFIX),$(IMAGETAG_PREFIX)-)$(BRANCH_NAME) EXCLUDEARCH="$(EXCLUDEARCH)"
-	$(MAKE) retag-build-images-with-registries push-images-to-registries push-manifests IMAGETAG=$(if $(IMAGETAG_PREFIX),$(IMAGETAG_PREFIX)-)$(shell git describe --tags --dirty --long --always --abbrev=12) EXCLUDEARCH="$(EXCLUDEARCH)"
+	$(MAKE) retag-build-images-with-registries push-images-to-registries IMAGETAG=$(if $(IMAGETAG_PREFIX),$(IMAGETAG_PREFIX)-)$(BRANCH_NAME) EXCLUDEARCH="$(EXCLUDEARCH)"
+	$(MAKE) retag-build-images-with-registries push-images-to-registries IMAGETAG=$(if $(IMAGETAG_PREFIX),$(IMAGETAG_PREFIX)-)$(shell git describe --tags --dirty --long --always --abbrev=12) EXCLUDEARCH="$(EXCLUDEARCH)"
 
 ###############################################################################
 # Release targets and helpers
@@ -1015,7 +998,7 @@ ifdef EXPECTED_RELEASE_TAG
 		@echo "Failed to verify release tag$(comma) expected release version is $(EXPECTED_RELEASE_TAG)$(comma) actual is $(RELEASE_TAG)."\
 		&& exit 1)
 endif
-	$(eval NEXT_RELEASE_VERSION = $(shell echo "$(call git-release-tag-from-dev-tag)" | awk -F  "." '{print $$1"."$$2"."$$3+1}'))
+	$(eval NEXT_RELEASE_VERSION = $(shell echo "$(call git-release-tag-from-dev-tag)" | awk '{ split($0,tag,"-"); if (tag[2] ~ /^1\./) { split(tag[2],subver,"."); print tag[1]"-"subver[1]+1".0" } else { split(tag[1],ver,"."); print ver[1]"."ver[2]"."ver[3]+1 } }'))
 ifndef IMAGE_ONLY
 	$(MAKE) maybe-tag-release maybe-push-release-tag\
 		RELEASE_TAG=$(RELEASE_TAG) BRANCH=$(RELEASE_BRANCH) DEV_TAG=$(DEV_TAG)
@@ -1140,7 +1123,7 @@ endif
 # Check if the codebase is dirty or not.
 check-dirty:
 	@if [ "$$(git --no-pager diff --stat)" != "" ]; then \
-	echo "The following files are dirty"; git --no-pager diff --stat; exit 1; fi
+	echo "The following files are dirty"; git --no-pager diff; exit 1; fi
 
 bin/yq:
 	mkdir -p bin
@@ -1253,21 +1236,55 @@ kind-cluster-destroy: $(KIND) $(KUBECTL)
 	rm -f $(KIND_KUBECONFIG)
 	rm -f $(REPO_ROOT)/.$(KIND_NAME).created
 
-kind $(KIND):
-	mkdir -p $(KIND_DIR)
-	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/github.com/projectcalico/calico/hack/test/kind go install sigs.k8s.io/kind@v0.14.0"
+$(KIND)-$(KIND_VERSION):
+	mkdir -p $(KIND_DIR)/$(KIND_VERSION)
+	$(DOCKER_GO_BUILD) sh -c "GOBIN=/go/src/github.com/projectcalico/calico/hack/test/kind/$(KIND_VERSION) go install sigs.k8s.io/kind@$(KIND_VERSION)"
+	mv $(KIND_DIR)/$(KIND_VERSION)/kind $(KIND_DIR)/kind-$(KIND_VERSION)
+	rm -r $(KIND_DIR)/$(KIND_VERSION)
 
-kubectl $(KUBECTL):
+$(KIND_DIR)/.kind-updated-$(KIND_VERSION): $(KIND)-$(KIND_VERSION)
+	rm -f $(KIND_DIR)/.kind-updated-*
+	cd $(KIND_DIR) && ln -fs kind-$(KIND_VERSION) kind
+	touch $@
+
+.PHONY: kind
+kind: $(KIND)
+	@echo "kind: $(KIND)"
+$(KIND): $(KIND_DIR)/.kind-updated-$(KIND_VERSION)
+
+$(KUBECTL)-$(K8S_VERSION):
 	mkdir -p $(KIND_DIR)
 	curl -L https://storage.googleapis.com/kubernetes-release/release/$(K8S_VERSION)/bin/linux/$(ARCH)/kubectl -o $@
 	chmod +x $@
 
-bin/helm:
+$(KIND_DIR)/.kubectl-updated-$(K8S_VERSION): $(KUBECTL)-$(K8S_VERSION)
+	rm -f $(KIND_DIR)/.kubectl-updated-*
+	cd $(KIND_DIR) && ln -fs kubectl-$(K8S_VERSION) kubectl
+	touch $@
+
+.PHONY: kubectl
+kubectl: $(KUBECTL)
+	@echo "kubectl: $(KUBECTL)"
+$(KUBECTL): $(KIND_DIR)/.kubectl-updated-$(K8S_VERSION)
+
+bin/helm-$(HELM_VERSION):
 	mkdir -p bin
 	$(eval TMP := $(shell mktemp -d))
-	curl -sSf -L --retry 5 -o $(TMP)/helm3.tar.gz https://get.helm.sh/helm-v3.11.0-linux-$(ARCH).tar.gz
+	curl -sSf -L --retry 5 -o $(TMP)/helm3.tar.gz https://get.helm.sh/helm-$(HELM_VERSION)-linux-$(ARCH).tar.gz
 	tar -zxvf $(TMP)/helm3.tar.gz -C $(TMP)
-	mv $(TMP)/linux-$(ARCH)/helm bin/helm
+	mv $(TMP)/linux-$(ARCH)/helm bin/helm-$(HELM_VERSION)
+
+bin/.helm-updated-$(HELM_VERSION): bin/helm-$(HELM_VERSION)
+	# Remove old marker files so that bin/helm will be stale if we switch
+	# branches and the helm version changes.
+	rm -f bin/.helm-updated-*
+	cd bin && ln -fs helm-$(HELM_VERSION) helm
+	touch $@
+
+.PHONY: helm
+helm: bin/helm
+	@echo "helm: $^"
+bin/helm: bin/.helm-updated-$(HELM_VERSION)
 
 ###############################################################################
 # Common functions for launching a local etcd instance.
