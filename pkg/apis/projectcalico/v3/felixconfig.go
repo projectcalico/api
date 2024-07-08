@@ -305,6 +305,14 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
 	EndpointReportingDelay *metav1.Duration `json:"endpointReportingDelay,omitempty" configv1timescale:"seconds" confignamev1:"EndpointReportingDelaySecs"`
 
+	// EndpointStatusPathPrefix is the path to the directory
+	// where endpoint status will be written. Endpoint status
+	// file reporting is disabled if field is left empty.
+	//
+	// Chosen directory should match the directory used by the CNI for PodStartupDelay.
+	// [Default: ""]
+	EndpointStatusPathPrefix string `json:"endpointStatusPathPrefix,omitempty"`
+
 	// IptablesMarkMask is the mask that Felix selects its IPTables Mark bits from. Should be a 32 bit hexadecimal
 	// number with at least 8 bits set, none of which clash with any other mark bits in use on the system.
 	// [Default: 0xff000000]
@@ -336,20 +344,20 @@ type FelixConfigurationSpec struct {
 	// PrometheusWireGuardMetricsEnabled disables wireguard metrics collection, which the Prometheus client does by default, when
 	// set to false. This reduces the number of metrics reported, reducing Prometheus load. [Default: true]
 	PrometheusWireGuardMetricsEnabled *bool `json:"prometheusWireGuardMetricsEnabled,omitempty"`
-
-	// FailsafeInboundHostPorts is a list of UDP/TCP ports and CIDRs that Felix will allow incoming traffic to host endpoints
-	// on irrespective of the security policy. This is useful to avoid accidentally cutting off a host with incorrect configuration.
-	// For back-compatibility, if the protocol is not specified, it defaults to "tcp". If a CIDR is not specified, it will allow
-	// traffic from all addresses. To disable all inbound host ports, use the value none. The default value allows ssh access
-	// and DHCP.
-	// [Default: tcp:22, udp:68, tcp:179, tcp:2379, tcp:2380, tcp:6443, tcp:6666, tcp:6667]
+	// FailsafeInboundHostPorts is a list of PortProto struct objects including UDP/TCP/SCTP ports and CIDRs that Felix will
+	// allow incoming traffic to host endpoints on irrespective of the security policy. This is useful to avoid accidentally
+	// cutting off a host with incorrect configuration. For backwards compatibility, if the protocol is not specified,
+	// it defaults to "tcp". If a CIDR is not specified, it will allow traffic from all addresses. To disable all inbound host ports,
+	// use the value "[]". The default value allows ssh access, DHCP, BGP, etcd and the Kubernetes API.
+	// [Default: tcp:22, udp:68, tcp:179, tcp:2379, tcp:2380, tcp:5473, tcp:6443, tcp:6666, tcp:6667 ]
 	FailsafeInboundHostPorts *[]ProtoPort `json:"failsafeInboundHostPorts,omitempty"`
-	// FailsafeOutboundHostPorts is a list of UDP/TCP ports and CIDRs that Felix will allow outgoing traffic from host endpoints
-	// to irrespective of the security policy. This is useful to avoid accidentally cutting off a host with incorrect configuration.
-	// For back-compatibility, if the protocol is not specified, it defaults to "tcp". If a CIDR is not specified, it will allow
-	// traffic from all addresses. To disable all outbound host ports, use the value none. The default value opens etcd's standard
-	// ports to ensure that Felix does not get cut off from etcd as well as allowing DHCP and DNS.
-	// [Default: tcp:179, tcp:2379, tcp:2380, tcp:6443, tcp:6666, tcp:6667, udp:53, udp:67]
+	// FailsafeOutboundHostPorts is a list of List of PortProto struct objects including UDP/TCP/SCTP ports and CIDRs that Felix
+	// will allow outgoing traffic from host endpoints to irrespective of the security policy. This is useful to avoid accidentally
+	// cutting off a host with incorrect configuration. For backwards compatibility, if the protocol is not specified, it defaults
+	// to "tcp". If a CIDR is not specified, it will allow traffic from all addresses. To disable all outbound host ports,
+	// use the value "[]". The default value opens etcd's standard ports to ensure that Felix does not get cut off from etcd
+	// as well as allowing DHCP, DNS, BGP and the Kubernetes API.
+	// [Default: udp:53, udp:67, tcp:179, tcp:2379, tcp:2380, tcp:5473, tcp:6443, tcp:6666, tcp:6667 ]
 	FailsafeOutboundHostPorts *[]ProtoPort `json:"failsafeOutboundHostPorts,omitempty"`
 
 	// KubeNodePortRanges holds list of port ranges used for service node ports. Only used if felix detects kube-proxy running in ipvs mode.
@@ -408,6 +416,15 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
 	DebugSimulateDataplaneHangAfter *metav1.Duration `json:"debugSimulateDataplaneHangAfter,omitempty" configv1timescale:"seconds"`
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
+	DebugSimulateDataplaneApplyDelay *metav1.Duration `json:"debugSimulateDataplaneApplyDelay,omitempty" configv1timescale:"seconds"`
+	// DebugHost is the host IP or hostname to bind the debug port to.  Only used
+	// if DebugPort is set. [Default:localhost]
+	DebugHost *string `json:"debugHost,omitempty"`
+	// DebugPort if set, enables Felix's debug HTTP port, which allows memory and CPU profiles
+	// to be retrieved.  The debug port is not secure, it should not be exposed to the internet.
+	DebugPort *int `json:"debugPort,omitempty" validate:"omitempty,gte=0,lte=65535"`
 
 	IptablesNATOutgoingInterfaceFilter string `json:"iptablesNATOutgoingInterfaceFilter,omitempty" validate:"omitempty,ifaceFilter"`
 
@@ -496,8 +513,9 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
 	BPFKubeProxyMinSyncPeriod *metav1.Duration `json:"bpfKubeProxyMinSyncPeriod,omitempty" validate:"omitempty" configv1timescale:"seconds"`
-	// BPFKubeProxyEndpointSlicesEnabled in BPF mode, controls whether Felix's
-	// embedded kube-proxy accepts EndpointSlices or not.
+	// BPFKubeProxyEndpointSlicesEnabled is deprecated and has no effect. BPF
+	// kube-proxy always accepts endpoint slices. This option will be removed in
+	// the next release.
 	BPFKubeProxyEndpointSlicesEnabled *bool `json:"bpfKubeProxyEndpointSlicesEnabled,omitempty" validate:"omitempty"`
 	// BPFPSNATPorts sets the range from which we randomly pick a port if there is a source port
 	// collision. This should be within the ephemeral range as defined by RFC 6056 (1024–65535) and
@@ -549,6 +567,10 @@ type FelixConfigurationSpec struct {
 	// BPFDisableGROForIfaces is a regular expression that controls which interfaces Felix should disable the
 	// Generic Receive Offload [GRO] option.  It should not match the workload interfaces (usually named cali...).
 	BPFDisableGROForIfaces string `json:"bpfDisableGROForIfaces,omitempty" validate:"omitempty,regexp"`
+	// BPFExcludeCIDRsFromNAT is a list of CIDRs that are to be excluded from NAT
+	// resolution so that host can handle them. A typical usecase is node local
+	// DNS cache.
+	BPFExcludeCIDRsFromNAT *[]string `json:"bpfExcludeCIDRsFromNAT,omitempty" validate:"omitempty,cidrs"`
 
 	// RouteSource configures where Felix gets its routing information.
 	// - WorkloadIPs: use workload endpoints to construct routes.
@@ -626,6 +648,30 @@ type FelixConfigurationSpec struct {
 	// WindowsManageFirewallRules configures whether or not Felix will program Windows Firewall rules. (to allow inbound access to its own metrics ports) [Default: Disabled]
 	// +optional
 	WindowsManageFirewallRules *WindowsManageFirewallRulesMode `json:"windowsManageFirewallRules,omitempty" validate:"omitempty,oneof=Enabled Disabled"`
+
+	// GoGCThreshold Sets the Go runtime's garbage collection threshold.  I.e. the percentage that the heap is
+	// allowed to grow before garbage collection is triggered.  In general, doubling the value halves the CPU time
+	// spent doing GC, but it also doubles peak GC memory overhead.  A special value of -1 can be used
+	// to disable GC entirely; this should only be used in conjunction with the GoMemoryLimitMB setting.
+	//
+	// This setting is overridden by the GOGC environment variable.
+	//
+	// [Default: 40]
+	// +optional
+	GoGCThreshold *int `json:"goGCThreshold,omitempty" validate:"omitempty,gte=-1"`
+
+	// GoMemoryLimitMB sets a (soft) memory limit for the Go runtime in MB.  The Go runtime will try to keep its memory
+	// usage under the limit by triggering GC as needed.  To avoid thrashing, it will exceed the limit if GC starts to
+	// take more than 50% of the process's CPU time.  A value of -1 disables the memory limit.
+	//
+	// Note that the memory limit, if used, must be considerably less than any hard resource limit set at the container
+	// or pod level.  This is because felix is not the only process that must run in the container or pod.
+	//
+	// This setting is overridden by the GOMEMLIMIT environment variable.
+	//
+	// [Default: -1]
+	// +optional
+	GoMemoryLimitMB *int `json:"goMemoryLimitMB,omitempty" validate:"omitempty,gte=-1"`
 }
 
 type HealthTimeoutOverride struct {

@@ -1271,6 +1271,21 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 		*out = new(v1.Duration)
 		**out = **in
 	}
+	if in.DebugSimulateDataplaneApplyDelay != nil {
+		in, out := &in.DebugSimulateDataplaneApplyDelay, &out.DebugSimulateDataplaneApplyDelay
+		*out = new(v1.Duration)
+		**out = **in
+	}
+	if in.DebugHost != nil {
+		in, out := &in.DebugHost, &out.DebugHost
+		*out = new(string)
+		**out = **in
+	}
+	if in.DebugPort != nil {
+		in, out := &in.DebugPort, &out.DebugPort
+		*out = new(int)
+		**out = **in
+	}
 	if in.SidecarAccelerationEnabled != nil {
 		in, out := &in.SidecarAccelerationEnabled, &out.SidecarAccelerationEnabled
 		*out = new(bool)
@@ -1410,6 +1425,15 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 			copy(*out, *in)
 		}
 	}
+	if in.BPFExcludeCIDRsFromNAT != nil {
+		in, out := &in.BPFExcludeCIDRsFromNAT, &out.BPFExcludeCIDRsFromNAT
+		*out = new([]string)
+		if **in != nil {
+			in, out := *in, *out
+			*out = make([]string, len(*in))
+			copy(*out, *in)
+		}
+	}
 	if in.RouteTableRanges != nil {
 		in, out := &in.RouteTableRanges, &out.RouteTableRanges
 		*out = new(RouteTableRanges)
@@ -1487,6 +1511,16 @@ func (in *FelixConfigurationSpec) DeepCopyInto(out *FelixConfigurationSpec) {
 	if in.WindowsManageFirewallRules != nil {
 		in, out := &in.WindowsManageFirewallRules, &out.WindowsManageFirewallRules
 		*out = new(WindowsManageFirewallRulesMode)
+		**out = **in
+	}
+	if in.GoGCThreshold != nil {
+		in, out := &in.GoGCThreshold, &out.GoGCThreshold
+		*out = new(int)
+		**out = **in
+	}
+	if in.GoMemoryLimitMB != nil {
+		in, out := &in.GoMemoryLimitMB, &out.GoMemoryLimitMB
+		*out = new(int)
 		**out = **in
 	}
 	return
