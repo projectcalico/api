@@ -32,6 +32,9 @@ ORGANIZATION := projectcalico
 # files from).
 CALICO_REPOSITORY_NAME := projectcalico/calico
 
+# The labels to apply to the API repo pull request
+GH_PR_LABELS := docs-not-required,release-note-not-required,merge-when-ready,delete-branch
+
 # The temporary directory we're going to clone to. This is going
 # to get removed if it exists already.
 CALICO_TEMP_DIR := /tmp/calico-api-mirror
@@ -138,6 +141,7 @@ commit-remote-api:
 	echo "* Creating PR (if it does not exist already)"
 	gh pr create --assignee '@me' --base $(GIT_BRANCH) --head $(ORGANIZATION):$(PR_BRANCH) \
 		--reviewer "projectcalico/release-team" \
+		--label $(GH_PR_LABELS) \
 		--fill || \
 		echo -e "\n** A failure indicating an existing pull request is fine! We will have updated that one instead of creating a new one!" && \
 		true
