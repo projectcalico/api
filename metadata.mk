@@ -8,7 +8,7 @@ GO_BUILD_VER=v0.91
 ACK_GINKGO=ACK_GINKGO_DEPRECATIONS=1.16.5
 
 # Version of Kubernetes to use for tests, bitnami/kubectl, and kubectl binary release.
-K8S_VERSION=v1.28.14
+K8S_VERSION=v1.28.15
 
 # Version of various tools used in the build and tests.
 COREDNS_VERSION=1.5.2
@@ -49,5 +49,8 @@ WINDOWS_VERSIONS ?= 1809 ltsc2022
 
 # The CNI plugin and flannel code that will be cloned and rebuilt with this repo's go-build image
 # whenever the cni-plugin image is created.
-CNI_VERSION=v1.1.1-calico+go-1.22.7
-FLANNEL_VERSION=v1.2.0-flannel2-go1.22.7
+CNI_VERSION=master
+FLANNEL_VERSION=main
+
+# The operator branch corresponding to this branch.
+OPERATOR_BRANCH=release-v1.34
