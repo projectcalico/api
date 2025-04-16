@@ -135,7 +135,7 @@ commit-remote-api:
 	git add .
 	git reset -q Makefile.local
 	echo "* Committing changes to branch"
-	git commit --quiet --message="$(COMMIT_MESSAGE_TITLE)"
+	git commit --quiet --message="$(COMMIT_MESSAGE_TITLE) - $(CALICO_GIT_REF)"
 	echo "* Pushing changes"
 	git push --quiet -f origin $(PR_BRANCH)
 	echo "* Creating PR (if it does not exist already)"
