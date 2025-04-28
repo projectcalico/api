@@ -3,10 +3,8 @@
 #################################################################################################
 
 # The version of calico/go-build and calico/base to use.
-GO_BUILD_VER=1.24.1-llvm18.1.8-k8s1.32.2
-CALICO_BASE_VER=ubi8-1741131622
-# TODO Remove once CALICO_BASE is updated to UBI9
-CALICO_BASE_UBI9_VER=ubi9-1741131622
+GO_BUILD_VER=1.24.2-llvm18.1.8-k8s1.32.3
+CALICO_BASE_VER=ubi8-1744398299
 
 # Env var to ACK Ginkgo deprecation warnings, may need updating with go-build.
 ACK_GINKGO=ACK_GINKGO_DEPRECATIONS=1.16.5
@@ -66,4 +64,4 @@ LIBBPF_VERSION=v1.4.6
 BPFTOOL_IMAGE=calico/bpftool:v7.5.0
 
 # The operator branch corresponding to this branch.
-OPERATOR_BRANCH=master
+OPERATOR_BRANCH=release-v1.38
