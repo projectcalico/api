@@ -45,7 +45,7 @@ CALICO_TEMP_DIR := /tmp/calico-api-mirror
 KEEP_LOCAL_FILES := README.md
 
 # The commit message/PR title to use when we commit our changes
-COMMIT_MESSAGE_TITLE := Automatic API update from $(CALICO_REPOSITORY_NAME) $(CALICO_VERSION)
+COMMIT_MESSAGE_TITLE := Automatic API update from $(CALICO_REPOSITORY_NAME) $(CALICO_GIT_REF)
 
 # A list of variables that we want to print out when we
 # run `make variables`; this is to ensure that users (or
@@ -142,7 +142,8 @@ commit-remote-api:
 	gh pr create --assignee '@me' --base $(GIT_BRANCH) --head $(ORGANIZATION):$(PR_BRANCH) \
 		--reviewer "projectcalico/release-team" \
 		--label $(GH_PR_LABELS) \
-		--fill || \
+		--title "$(COMMIT_MESSAGE_TITLE)" \
+		--body "" || \
 		echo -e "\n** A failure indicating an existing pull request is fine! We will have updated that one instead of creating a new one!" && \
 		true
 	git switch --quiet $(GIT_BRANCH)
