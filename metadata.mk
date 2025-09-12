@@ -3,24 +3,25 @@
 #################################################################################################
 
 # The version of calico/go-build and calico/base to use.
-GO_BUILD_VER=1.24.1-llvm18.1.8-k8s1.32.2
-CALICO_BASE_VER=ubi8-1741131622
-# TODO Remove once CALICO_BASE is updated to UBI9
-CALICO_BASE_UBI9_VER=ubi9-1741131622
+GO_BUILD_VER=1.24.6-llvm18.1.8-k8s1.33.3
+CALICO_BASE_VER=ubi9-1754517943
 
 # Env var to ACK Ginkgo deprecation warnings, may need updating with go-build.
 ACK_GINKGO=ACK_GINKGO_DEPRECATIONS=1.16.5
 
-# Version of Kubernetes to use for tests, bitnami/kubectl, and kubectl binary release.
-K8S_VERSION=v1.32.3
+# Version of Kubernetes to use for tests, rancher/kubectl, and kubectl binary release.
+K8S_VERSION=v1.33.3
 
 # Version of various tools used in the build and tests.
 COREDNS_VERSION=1.5.2
+CRANE_VERSION := v0.20.6
 ETCD_VERSION=v3.5.6
 GHR_VERSION=v0.17.0
+GITHUB_CLI_VERSION=2.76.2
+GOTESTSUM_VERSION=v1.12.3
 HELM_VERSION=v3.11.3
-KINDEST_NODE_VERSION=v1.31.6
-KIND_VERSION=v0.27.0
+KINDEST_NODE_VERSION=v1.33.1
+KIND_VERSION=v0.29.0
 
 # Configuration for Semaphore/Github integration.  This needs to be set
 # differently for a forked repo.
@@ -67,3 +68,6 @@ BPFTOOL_IMAGE=calico/bpftool:v7.5.0
 
 # The operator branch corresponding to this branch.
 OPERATOR_BRANCH=master
+
+# quay.io expiry time for hashrelease/dev images
+QUAY_EXPIRE_DAYS=90
