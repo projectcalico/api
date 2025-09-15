@@ -49,13 +49,17 @@ CALICO_TEMP_DIR := /tmp/calico-api-mirror
 KEEP_LOCAL_FILES := README.md
 
 # The commit message/PR title to use when we commit our changes
+ifneq ($(origin CALICO_GIT_REF), file)
+COMMIT_MESSAGE_TITLE := Automatic API update from $(CALICO_REPOSITORY_NAME) $(CALICO_GIT_REF)
+else
 COMMIT_MESSAGE_TITLE := Automatic API update from $(CALICO_REPOSITORY_NAME) $(CALICO_VERSION)
+endif
 
 # A list of variables that we want to print out when we
 # run `make variables`; this is to ensure that users (or
 # automated jobs, down the road) can see clearly
 # what defaults we're using.
-VERBOSE_LOCAL_VARIABLES = GIT_BRANCH CALICO_GIT_REF PR_BRANCH CALICO_TEMP_DIR CALICO_REPOSITORY_NAME CALICO_UPSTREAM_REMOTE
+VERBOSE_LOCAL_VARIABLES = GIT_BRANCH CALICO_GIT_REF PR_BRANCH CALICO_TEMP_DIR CALICO_REPOSITORY_NAME CALICO_UPSTREAM_REMOTE COMMIT_MESSAGE_TITLE
 
 help:
 	$(info Calico API local Makefile)
