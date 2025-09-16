@@ -32,6 +32,10 @@ ORGANIZATION := projectcalico
 # files from).
 CALICO_REPOSITORY_NAME := projectcalico/calico
 
+# The name of the remote that represents the canonical api repository
+# (in case origin is our fork, which is how `gh` sets things up)
+CALICO_UPSTREAM_REMOTE := $(shell git remote -v | grep "push" | grep "[^a-z]$(ORGANIZATION)/api" | awk '{print $$1}')
+
 # The temporary directory we're going to clone to. This is going
 # to get removed if it exists already.
 CALICO_TEMP_DIR := /tmp/calico-api-mirror
@@ -42,13 +46,17 @@ CALICO_TEMP_DIR := /tmp/calico-api-mirror
 KEEP_LOCAL_FILES := README.md
 
 # The commit message/PR title to use when we commit our changes
+ifneq ($(origin CALICO_GIT_REF), file)
+COMMIT_MESSAGE_TITLE := Automatic API update from $(CALICO_REPOSITORY_NAME) $(CALICO_GIT_REF)
+else
 COMMIT_MESSAGE_TITLE := Automatic API update from $(CALICO_REPOSITORY_NAME) $(CALICO_VERSION)
+endif
 
 # A list of variables that we want to print out when we
 # run `make variables`; this is to ensure that users (or
 # automated jobs, down the road) can see clearly
 # what defaults we're using.
-VERBOSE_LOCAL_VARIABLES = GIT_BRANCH CALICO_GIT_REF PR_BRANCH CALICO_TEMP_DIR CALICO_REPOSITORY_NAME
+VERBOSE_LOCAL_VARIABLES = GIT_BRANCH CALICO_GIT_REF PR_BRANCH CALICO_TEMP_DIR CALICO_REPOSITORY_NAME CALICO_UPSTREAM_REMOTE COMMIT_MESSAGE_TITLE
 
 help:
 	$(info Calico API local Makefile)
@@ -134,7 +142,7 @@ commit-remote-api:
 	echo "* Committing changes to branch"
 	git commit --quiet --message="$(COMMIT_MESSAGE_TITLE)"
 	echo "* Pushing changes"
-	git push --quiet -f origin $(PR_BRANCH)
+	git push --quiet -f $(CALICO_UPSTREAM_REMOTE) $(PR_BRANCH)
 	echo "* Creating PR (if it does not exist already)"
 	gh pr create --assignee '@me' --base $(GIT_BRANCH) --head $(ORGANIZATION):$(PR_BRANCH) \
 		--reviewer "projectcalico/release-team" \
