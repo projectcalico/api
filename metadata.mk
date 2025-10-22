@@ -3,7 +3,7 @@
 #################################################################################################
 
 # The version of calico/go-build and calico/base to use.
-GO_BUILD_VER=1.24.6-llvm18.1.8-k8s1.33.3
+GO_BUILD_VER=1.24.9-llvm18.1.8-k8s1.33.5
 CALICO_BASE_VER=ubi9-1754517943
 
 # Env var to ACK Ginkgo deprecation warnings, may need updating with go-build.
@@ -67,7 +67,7 @@ LIBBPF_VERSION=v1.4.6
 BPFTOOL_IMAGE=calico/bpftool:v7.5.0
 
 # The operator branch corresponding to this branch.
-OPERATOR_BRANCH=master
+OPERATOR_BRANCH=release-v1.40
 
 # quay.io expiry time for hashrelease/dev images
 QUAY_EXPIRE_DAYS=90
