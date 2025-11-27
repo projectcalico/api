@@ -3,8 +3,8 @@
 #################################################################################################
 
 # The version of calico/go-build and calico/base to use.
-GO_BUILD_VER=1.24.6-llvm18.1.8-k8s1.32.8
-CALICO_BASE_VER=ubi8-1744398299
+GO_BUILD_VER=1.24.9-llvm18.1.8-k8s1.32.9
+CALICO_BASE_VER=ubi8-1759892166
 
 # Env var to ACK Ginkgo deprecation warnings, may need updating with go-build.
 ACK_GINKGO=ACK_GINKGO_DEPRECATIONS=1.16.5
@@ -14,6 +14,7 @@ K8S_VERSION=v1.32.4
 
 # Version of various tools used in the build and tests.
 COREDNS_VERSION=1.5.2
+CRANE_VERSION=v0.20.6
 ETCD_VERSION=v3.5.6
 GHR_VERSION=v0.17.0
 HELM_VERSION=v3.11.3
