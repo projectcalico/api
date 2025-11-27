@@ -709,6 +709,10 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
 	BPFKubeProxyMinSyncPeriod *metav1.Duration `json:"bpfKubeProxyMinSyncPeriod,omitempty" validate:"omitempty" configv1timescale:"seconds"`
 
+	// BPFKubeProxyHealtzPort, in BPF mode, controls the port that Felix's embedded kube-proxy health check server binds to.
+	// The health check server is used by external load balancers to determine if this node should receive traffic.  [Default: 10256]
+	BPFKubeProxyHealtzPort *int `json:"bpfKubeProxyHealtzPort,omitempty" validate:"omitempty,gte=1,lte=65535" confignamev1:"BPFKubeProxyHealtzPort"`
+
 	// BPFKubeProxyEndpointSlicesEnabled is deprecated and has no effect. BPF
 	// kube-proxy always accepts endpoint slices. This option will be removed in
 	// the next release.
@@ -805,6 +809,9 @@ type FelixConfigurationSpec struct {
 	// BPFExportBufferSizeMB in BPF mode, controls the buffer size used for sending BPF events to felix.
 	// [Default: 1]
 	BPFExportBufferSizeMB *int `json:"bpfExportBufferSizeMB,omitempty" validate:"omitempty,cidrs"`
+
+	// CgroupV2Path overrides the default location where to find the cgroup hierarchy.
+	CgroupV2Path string `json:"cgroupV2Path,omitempty"`
 
 	// Continuous - Felix evaluates active flows on a regular basis to determine the rule
 	// traces in the flow logs. Any policy updates that impact a flow will be reflected in the
