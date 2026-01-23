@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2025 Tigera, Inc. All rights reserved.
+// Copyright (c) 2017-2026 Tigera, Inc. All rights reserved.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -301,8 +301,29 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Pattern=`^(?i)(Drop|Reject)?$`
 	IptablesFilterDenyAction string `json:"iptablesFilterDenyAction,omitempty" validate:"omitempty,dropReject"`
 
-	// LogPrefix is the log prefix that Felix uses when rendering LOG rules. [Default: calico-packet]
+	// LogPrefix is the log prefix that Felix uses when rendering LOG rules. It is possible to use the following specifiers
+	// to include extra information in the log prefix.
+	// - %t: Tier name.
+	// - %k: Kind (short names).
+	// - %n: Policy or profile name.
+	// - %p: Policy or profile name (namespace/name for namespaced kinds or just name for non namespaced kinds).
+	// Calico includes ": " characters at the end of the generated log prefix.
+	// Note that iptables shows up to 29 characters for the log prefix and nftables up to 127 characters. Extra characters are truncated.
+	// [Default: calico-packet]
+	// +kubebuilder:validation:Pattern=`^([a-zA-Z0-9%: /_-])*$`
 	LogPrefix string `json:"logPrefix,omitempty"`
+
+	// LogActionRateLimit sets the rate of hitting a Log action. The value must be in the format "N/unit",
+	// where N is a number and unit is one of: second, minute, hour, or day. For example: "10/second" or "100/hour".
+	// +optional
+	// +kubebuilder:validation:Pattern=`^[1-9]\d{0,3}/(?:second|minute|hour|day)$`
+	LogActionRateLimit *string `json:"logActionRateLimit,omitempty"`
+
+	// LogActionRateLimitBurst sets the rate limit burst of hitting a Log action when LogActionRateLimit is enabled.
+	// +optional
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=9999
+	LogActionRateLimitBurst *int `json:"logActionRateLimitBurst,omitempty"`
 
 	// LogFilePath is the full path to the Felix log. Set to none to disable file logging. [Default: /var/log/calico/felix.log]
 	LogFilePath string `json:"logFilePath,omitempty"`
@@ -709,6 +730,10 @@ type FelixConfigurationSpec struct {
 	// +kubebuilder:validation:Pattern=`^([0-9]+(\\.[0-9]+)?(ms|s|m|h))*$`
 	BPFKubeProxyMinSyncPeriod *metav1.Duration `json:"bpfKubeProxyMinSyncPeriod,omitempty" validate:"omitempty" configv1timescale:"seconds"`
 
+	// BPFKubeProxyHealthzPort, in BPF mode, controls the port that Felix's embedded kube-proxy health check server binds to.
+	// The health check server is used by external load balancers to determine if this node should receive traffic.  [Default: 10256]
+	BPFKubeProxyHealthzPort *int `json:"bpfKubeProxyHealthzPort,omitempty" validate:"omitempty,gte=1,lte=65535" confignamev1:"BPFKubeProxyHealthzPort"`
+
 	// BPFKubeProxyEndpointSlicesEnabled is deprecated and has no effect. BPF
 	// kube-proxy always accepts endpoint slices. This option will be removed in
 	// the next release.
@@ -805,6 +830,9 @@ type FelixConfigurationSpec struct {
 	// BPFExportBufferSizeMB in BPF mode, controls the buffer size used for sending BPF events to felix.
 	// [Default: 1]
 	BPFExportBufferSizeMB *int `json:"bpfExportBufferSizeMB,omitempty" validate:"omitempty,cidrs"`
+
+	// CgroupV2Path overrides the default location where to find the cgroup hierarchy.
+	CgroupV2Path string `json:"cgroupV2Path,omitempty"`
 
 	// Continuous - Felix evaluates active flows on a regular basis to determine the rule
 	// traces in the flow logs. Any policy updates that impact a flow will be reflected in the
