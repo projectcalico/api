@@ -46,7 +46,7 @@ CALICO_TEMP_DIR := /tmp/calico-api-mirror
 # List of files that we should keep even if they've changed upstream;
 # At the moment, we keep the README because this repository has
 # its own README; the upstream one isn't relevant to this repository.
-KEEP_LOCAL_FILES := README.md
+KEEP_LOCAL_FILES := README.md Makefile
 
 # The commit message/PR title to use when we commit our changes
 ifneq ($(origin CALICO_GIT_REF), file)
@@ -105,6 +105,11 @@ pull-upstream-changes:
 	cp -r $(CALICO_TEMP_DIR)/api/. .
 	cp $(CALICO_TEMP_DIR)/lib.Makefile .
 	cp $(CALICO_TEMP_DIR)/metadata.mk .
+
+	# Remove monorepo-only directories and files that don't belong in the
+	# standalone API repo. The bgpfilter_test.go file requires a kind cluster.
+	rm -rf config/ admission/ patches/
+	rm -f pkg/apis/projectcalico/v3/bgpfilter_test.go
 
 # Restores any files that we want to keep even if they're different
 # upstream. For example, `README.md` is different in this repository
