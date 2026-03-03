@@ -106,8 +106,10 @@ pull-upstream-changes:
 	cp $(CALICO_TEMP_DIR)/lib.Makefile .
 	cp $(CALICO_TEMP_DIR)/metadata.mk .
 
-	# Remove monorepo-only directories that don't belong in the standalone API repo.
+	# Remove monorepo-only directories and files that don't belong in the
+	# standalone API repo. The bgpfilter_test.go file requires a kind cluster.
 	rm -rf config/ admission/ patches/
+	rm -f pkg/apis/projectcalico/v3/bgpfilter_test.go
 
 # Restores any files that we want to keep even if they're different
 # upstream. For example, `README.md` is different in this repository
