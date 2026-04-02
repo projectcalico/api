@@ -1,0 +1,69 @@
+# Sync API files from projectcalico/calico into this repo.
+# Creates or updates a PR if anything changed.
+---
+name: Sync Calico API
+on:  # yamllint disable-line rule:truthy
+  schedule:
+    - cron: '0 * * * *'  # every hour
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  discover-branches:
+    if: github.repository == 'projectcalico/api'
+    runs-on: ubuntu-latest
+    outputs:
+      branches: ${{ steps.branches.outputs.branches }}
+    steps:
+      - name: Discover branches
+        id: branches
+        run: |
+          # Get master + the two most recent release branches (by semver).
+          branches=$(gh api repos/${{ github.repository }}/branches --paginate --jq '
+            [.[] | select(.name | startswith("release-")) | .name]
+            | sort_by(ltrimstr("release-v") | split(".") | map(tonumber))
+            | .[-2:]
+            | ["master"] + .
+          ')
+          echo "branches=${branches}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  sync:
+    needs: discover-branches
+    runs-on: ubuntu-latest
+    concurrency:
+      group: sync-calico-api-${{ matrix.branch }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJson(needs.discover-branches.outputs.branches) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Configure git auth
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+      - name: Sync API from calico monorepo
+        run: make -f Makefile.local update
+
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Automatic API update from projectcalico/calico ${{ matrix.branch }}"
+          branch: auto-api-update-${{ matrix.branch }}
+          base: ${{ matrix.branch }}
+          title: "Auto: sync API from projectcalico/calico [${{ matrix.branch }}]"
+          body: |
+            Automated sync of API files from `projectcalico/calico` `${{ matrix.branch }}`
+            branch into this repo via `make -f Makefile.local update`.
+
+            Triggered by scheduled workflow.
+          labels: docs-not-required,release-note-not-required,merge-when-ready,delete-branch
+          delete-branch: true
