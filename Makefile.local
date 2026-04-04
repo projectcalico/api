@@ -108,7 +108,8 @@ pull-upstream-changes:
 
 	# Remove monorepo-only directories and files that don't belong in the
 	# standalone API repo. The bgpfilter_test.go file requires a kind cluster.
-	rm -rf config/ admission/ patches/
+	# Keep config/crd/ (needed by embed.go) and patches/ (needed by update-client-gen.sh).
+	rm -rf config/admission/
 	rm -f pkg/apis/projectcalico/v3/bgpfilter_test.go
 
 # Restores any files that we want to keep even if they're different
