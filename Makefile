@@ -68,6 +68,16 @@ gen-files .generate_files: lint-cache-dir clean-generated
 		--bounding-dirs $(PACKAGE_NAME) \
 		--output-file zz_generated.deepcopy.go \
 		"$(PACKAGE_NAME)/pkg/apis/projectcalico/v3"'
+	# generate OpenAPI model name accessors for Calico types.
+	$(DOCKER_RUN) $(CALICO_BUILD) \
+	   sh -c '$(GIT_CONFIG_SSH) openapi-gen \
+		--v 1 --logtostderr \
+		--go-header-file "/go/src/$(PACKAGE_NAME)/hack/boilerplate/boilerplate.go.txt" \
+		--output-dir /tmp/openapi-gen-model-names \
+		--output-pkg "$(PACKAGE_NAME)/pkg/openapi" \
+		--output-model-name-file zz_generated.model_name.go \
+		"$(PACKAGE_NAME)/pkg/apis/projectcalico/v3" \
+		"$(PACKAGE_NAME)/pkg/lib/numorstring"'
 
 	# generate openapi (must run before client-gen, which uses it for --openapi-schema)
 	$(DOCKER_RUN) $(CALICO_BUILD) \
