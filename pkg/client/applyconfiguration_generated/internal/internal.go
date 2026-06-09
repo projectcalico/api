@@ -87,7 +87,7 @@ var schemaYAML = typed.YAMLObject(`types:
         list:
           elementType:
             namedType: com.github.projectcalico.api.pkg.apis.projectcalico.v3.Community
-          elementRelationship: associative
+          elementRelationship: atomic
     - name: ignoredInterfaces
       type:
         list:
@@ -126,7 +126,7 @@ var schemaYAML = typed.YAMLObject(`types:
         list:
           elementType:
             namedType: com.github.projectcalico.api.pkg.apis.projectcalico.v3.PrefixAdvertisement
-          elementRelationship: associative
+          elementRelationship: atomic
     - name: programClusterRoutes
       type:
         scalar: string
@@ -135,13 +135,13 @@ var schemaYAML = typed.YAMLObject(`types:
         list:
           elementType:
             namedType: com.github.projectcalico.api.pkg.apis.projectcalico.v3.ServiceClusterIPBlock
-          elementRelationship: associative
+          elementRelationship: atomic
     - name: serviceExternalIPs
       type:
         list:
           elementType:
             namedType: com.github.projectcalico.api.pkg.apis.projectcalico.v3.ServiceExternalIPBlock
-          elementRelationship: associative
+          elementRelationship: atomic
     - name: serviceLoadBalancerAggregation
       type:
         scalar: string
@@ -150,7 +150,7 @@ var schemaYAML = typed.YAMLObject(`types:
         list:
           elementType:
             namedType: com.github.projectcalico.api.pkg.apis.projectcalico.v3.ServiceLoadBalancerIPBlock
-          elementRelationship: associative
+          elementRelationship: atomic
 - name: com.github.projectcalico.api.pkg.apis.projectcalico.v3.BGPDaemonStatus
   map:
     fields:
@@ -1176,6 +1176,9 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: liveMigrationRouteConvergenceTime
       type:
         namedType: io.k8s.apimachinery.pkg.apis.meta.v1.Duration
+    - name: localSubnetL2Reachability
+      type:
+        scalar: string
     - name: logActionRateLimit
       type:
         scalar: string
