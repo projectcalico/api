@@ -108,7 +108,7 @@ pull-upstream-changes:
 
 	# Remove monorepo-only directories and files that don't belong in the
 	# standalone API repo. Keep config/crd/ (needed by embed.go) and
-	# patches/ (needed by update-client-gen.sh).
+	# patches/ (needed by build/codegen.sh).
 	rm -rf admission/ config/admission/
 	rm -f pkg/apis/projectcalico/v3/bgpfilter_test.go
 
