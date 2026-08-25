@@ -2,15 +2,15 @@
 # This file contains Makefile configuration parameters and metadata for this branch.
 #################################################################################################
 # The project Go version
-GO_VERSION=1.25.11
+GO_VERSION=1.25.14
 # Version of Kubernetes to use for dependencies, tests, registry.k8s.io/kubectl, and kubectl binary release.
-K8S_VERSION=v1.35.6
+K8S_VERSION=v1.35.8
 # The version of LLVM to use for go-build and calico/base images.
 LLVM_VERSION=18.1.8
 # The version of calico/go-build and calico/base to use.
 GO_BUILD_VER=$(GO_VERSION)-llvm$(LLVM_VERSION)-k8s$(K8S_VERSION:v%=%)
 RUST_BUILD_VER=1.93.1
-CALICO_BASE_VER=ubi9-1781722225
+CALICO_BASE_VER=ubi9-1787377327
 
 # Version of various tools used in the build and tests.
 COREDNS_VERSION=1.5.2
@@ -58,7 +58,7 @@ WINDOWS_VERSIONS ?= ltsc2019 ltsc2022
 
 # The CNI plugin and flannel code that will be cloned and rebuilt with this repo's go-build image
 # whenever the cni-plugin image is created.
-CNI_VERSION=master
+CNI_VERSION=9ffe547cb3b66f80dd32a00fc69a6d0082b55321
 FLANNEL_VERSION=main
 
 # The libbpf version to use
