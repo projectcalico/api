@@ -3,14 +3,14 @@
 #################################################################################################
 
 # The project Go version
-GO_VERSION=1.25.11
+GO_VERSION=1.25.13
 # Version of Kubernetes to use for dependencies, tests, registry.k8s.io/kubectl, and kubectl binary release.
-K8S_VERSION=v1.33.12
+K8S_VERSION=v1.33.13
 # The version of LLVM to use for go-build and calico/base images.
 LLVM_VERSION=18.1.8
 # The version of calico/go-build and calico/base to use.
 GO_BUILD_VER=$(GO_VERSION)-llvm$(LLVM_VERSION)-k8s$(K8S_VERSION:v%=%)
-CALICO_BASE_VER=ubi9-1780507355
+CALICO_BASE_VER=ubi9-1786653669
 
 # Env var to ACK Ginkgo deprecation warnings, may need updating with go-build.
 ACK_GINKGO=ACK_GINKGO_DEPRECATIONS=1.16.5
@@ -60,7 +60,7 @@ WINDOWS_VERSIONS ?= 1809 ltsc2022
 
 # The CNI plugin and flannel code that will be cloned and rebuilt with this repo's go-build image
 # whenever the cni-plugin image is created.
-CNI_VERSION=master
+CNI_VERSION=9ffe547cb3b66f80dd32a00fc69a6d0082b55321
 FLANNEL_VERSION=main
 
 # The libbpf version to use
