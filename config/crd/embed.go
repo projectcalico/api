@@ -1,28 +1,30 @@
-// Copyright (c) 2016,2018 Tigera, Inc. All rights reserved.
-
+// Copyright (c) 2026 Tigera, Inc. All rights reserved.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//	http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package numorstring_test
+
+// Package crd serves the generated projectcalico.org v3 CRDs to the components
+// that install them, so nothing has to keep a copy of its own.
+package crd
 
 import (
-	"testing"
-
-	"github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
+	"embed"
+	"io/fs"
 )
 
-func TestNumorstring(t *testing.T) {
-	gomega.RegisterFailHandler(ginkgo.Fail)
-	suiteConfig, reporterConfig := ginkgo.GinkgoConfiguration()
-	reporterConfig.JUnitReport = "../../../report/numorstring_suite.xml"
-	ginkgo.RunSpecs(t, "Numorstring Suite", suiteConfig, reporterConfig)
+//go:embed *.yaml
+var crds embed.FS
+
+// FS returns the CRD YAML generated into this directory.
+func FS() fs.FS {
+	return crds
 }
