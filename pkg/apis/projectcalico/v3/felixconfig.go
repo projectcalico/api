@@ -457,6 +457,9 @@ type FelixConfigurationSpec struct {
 	// IptablesMarkMask is the mask that Felix selects its IPTables Mark bits from. Should be a 32 bit hexadecimal
 	// number with at least 8 bits set, none of which clash with any other mark bits in use on the system.
 	// [Default: 0xffff0000]
+	// +kubebuilder:validation:Format=int64
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=4294967295
 	IptablesMarkMask *uint32 `json:"iptablesMarkMask,omitempty"`
 
 	// DisableConntrackInvalidCheck disables the check for invalid connections in conntrack. While the conntrack
@@ -683,6 +686,9 @@ type FelixConfigurationSpec struct {
 	// NftablesMarkMask is the mask that Felix selects its nftables Mark bits from. Should be a 32 bit hexadecimal
 	// number with at least 8 bits set, none of which clash with any other mark bits in use on the system.
 	// [Default: 0xffff0000]
+	// +kubebuilder:validation:Format=int64
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=4294967295
 	NftablesMarkMask *uint32 `json:"nftablesMarkMask,omitempty"`
 
 	// BPFEnabled, if enabled Felix will use the BPF dataplane. [Default: false]
@@ -855,8 +861,8 @@ type FelixConfigurationSpec struct {
 	BPFMapSizePerCPUConntrack *int `json:"bpfMapSizePerCpuConntrack,omitempty"`
 
 	// BPFMapSizeConntrackScaling controls whether and how we scale the conntrack map size depending
-	// on its usage. 'Disabled' make the size stay at the default or whatever is set by
-	// BPFMapSizeConntrack*. 'DoubleIfFull' doubles the size when the map is pretty much full even
+	// on its usage. 'Disabled' stops the map from growing; a map that already grew keeps its size.
+	// 'DoubleIfFull' doubles the size of an IP family's map when it is more than 80% full
 	// after cleanups. [Default: DoubleIfFull]
 	// +kubebuilder:validation:Pattern=`^(?i)(Disabled|DoubleIfFull)?$`
 	BPFMapSizeConntrackScaling string `json:"bpfMapSizeConntrackScaling,omitempty"`
