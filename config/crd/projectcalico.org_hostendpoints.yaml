@@ -112,6 +112,14 @@ spec:
                       - port
                       - protocol
                     type: object
+                    x-kubernetes-validations:
+                      - message:
+                          protocol must be one of TCP, UDP, SCTP, or their numbers
+                          6, 17, 132
+                        reason: FieldValueInvalid
+                        rule:
+                          "type(self.protocol) == int ? self.protocol in [6, 17, 132]
+                          : self.protocol in ['TCP', 'UDP', 'SCTP']"
                   type: array
                   x-kubernetes-list-type: atomic
                 profiles:
@@ -120,6 +128,8 @@ spec:
                     profile is applied in the order that they appear in this list.  Profile rules are applied
                     after the selector-based security policy.
                   items:
+                    maxLength: 253
+                    pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
                     type: string
                   type: array
                   x-kubernetes-list-type: set
@@ -137,6 +147,8 @@ spec:
             - metadata
             - spec
           type: object
+      selectableFields:
+        - jsonPath: .spec.node
       served: true
       storage: true
       subresources: {}
