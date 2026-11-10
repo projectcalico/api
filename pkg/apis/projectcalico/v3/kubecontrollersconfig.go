@@ -63,8 +63,8 @@ const (
 // KubeControllersConfigurationSpec contains the values of the Kubernetes controllers configuration.
 type KubeControllersConfigurationSpec struct {
 	// LogSeverityScreen is the log severity above which logs are sent to the stdout. [Default: Info]
-	// Valid values are: "None", "Debug", "Info", "Warning", "Error", "Fatal", "Panic".
-	// +kubebuilder:validation:Enum=None;Debug;Info;Warning;Error;Fatal;Panic
+	// Valid values are: "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "Panic".
+	// +kubebuilder:validation:Enum=Trace;Debug;Info;Warning;Error;Fatal;Panic
 	LogSeverityScreen string `json:"logSeverityScreen,omitempty" validate:"omitempty,logLevel"`
 
 	// HealthChecks enables or disables support for health checks [Default: Enabled]
@@ -185,6 +185,7 @@ type Template struct {
 	Labels map[string]string `json:"labels,omitempty" validate:"omitempty,labels"`
 
 	// NodeSelector allows the AutoHostEndpoint to be created only for specific nodes
+	// +kubebuilder:validation:MaxLength=1024
 	NodeSelector string `json:"nodeSelector,omitempty" validate:"omitempty,selector"`
 }
 
