@@ -42,6 +42,10 @@ const (
 // +kubebuilder:validation:XValidation:rule="(!has(self.protocol) || (self.protocol != 'ICMPv6' && self.protocol != 58)) || !has(self.ipVersion) || self.ipVersion == 6",message="protocol ICMPv6 requires ipVersion 6",reason=FieldValueInvalid
 // +kubebuilder:validation:XValidation:rule="(!has(self.notProtocol) || (self.notProtocol != 'ICMP' && self.notProtocol != 1)) || !has(self.ipVersion) || self.ipVersion == 4",message="protocol ICMP requires ipVersion 4",reason=FieldValueInvalid
 // +kubebuilder:validation:XValidation:rule="(!has(self.notProtocol) || (self.notProtocol != 'ICMPv6' && self.notProtocol != 58)) || !has(self.ipVersion) || self.ipVersion == 6",message="protocol ICMPv6 requires ipVersion 6",reason=FieldValueInvalid
+// +kubebuilder:validation:XValidation:rule="!has(self.protocol) || (type(self.protocol) == int ? self.protocol >= 1 && self.protocol <= 255 : self.protocol in ['TCP', 'UDP', 'ICMP', 'ICMPv6', 'SCTP', 'UDPLite'])",message="protocol must be a name (TCP, UDP, ICMP, ICMPv6, SCTP, UDPLite) or a number in 1-255",reason=FieldValueInvalid
+// +kubebuilder:validation:XValidation:rule="!has(self.notProtocol) || (type(self.notProtocol) == int ? self.notProtocol >= 1 && self.notProtocol <= 255 : self.notProtocol in ['TCP', 'UDP', 'ICMP', 'ICMPv6', 'SCTP', 'UDPLite'])",message="protocol must be a name (TCP, UDP, ICMP, ICMPv6, SCTP, UDPLite) or a number in 1-255",reason=FieldValueInvalid
+// +kubebuilder:validation:XValidation:rule="!has(self.protocol) || (type(self.protocol) == int ? self.protocol in [6, 17, 132] : self.protocol in ['TCP', 'UDP', 'SCTP']) || ((!has(self.source) || ((!has(self.source.ports) || size(self.source.ports) == 0) && (!has(self.source.notPorts) || size(self.source.notPorts) == 0))) && (!has(self.destination) || ((!has(self.destination.ports) || size(self.destination.ports) == 0) && (!has(self.destination.notPorts) || size(self.destination.notPorts) == 0))))",message="rules that specify ports must set protocol to TCP or UDP or SCTP",reason=FieldValueInvalid
+// +kubebuilder:validation:XValidation:rule="has(self.protocol) || ((!has(self.source) || ((!has(self.source.ports) || self.source.ports.all(p, type(p) == string)) && (!has(self.source.notPorts) || self.source.notPorts.all(p, type(p) == string)))) && (!has(self.destination) || ((!has(self.destination.ports) || self.destination.ports.all(p, type(p) == string)) && (!has(self.destination.notPorts) || self.destination.notPorts.all(p, type(p) == string)))))",message="rules with a numeric port must set protocol to TCP or UDP or SCTP",reason=FieldValueInvalid
 type Rule struct {
 	Action Action `json:"action"`
 
@@ -72,11 +76,11 @@ type Rule struct {
 
 	// Source contains the match criteria that apply to source entity.
 	// +optional
-	Source EntityRule `json:"source,omitzero" validate:"omitempty"`
+	Source EntityRule `json:"source,omitempty" validate:"omitempty"`
 
 	// Destination contains the match criteria that apply to destination entity.
 	// +optional
-	Destination EntityRule `json:"destination,omitzero" validate:"omitempty"`
+	Destination EntityRule `json:"destination,omitempty" validate:"omitempty"`
 
 	// HTTP contains match criteria that apply to HTTP requests.
 	HTTP *HTTPMatch `json:"http,omitempty" validate:"omitempty"`
@@ -205,7 +209,11 @@ type EntityRule struct {
 	//
 	// Since only some protocols have ports, if any ports are specified it requires the
 	// Protocol match in the Rule to be set to "TCP", "UDP", or "SCTP".
+	// Named ports are at most 15 characters, like Kubernetes port names.
 	// +kubebuilder:validation:MaxItems=50
+	// +kubebuilder:validation:items:XIntOrString
+	// +kubebuilder:validation:items:MaxLength=15
+	// +kubebuilder:validation:items:XValidation:rule="type(self) != string || !self.contains(':') || int(self.split(':')[0]) <= int(self.split(':')[1])",message="port ranges must be written low:high",reason=FieldValueInvalid
 	// +listType=atomic
 	Ports []numorstring.Port `json:"ports,omitempty" validate:"omitempty,dive"`
 
@@ -223,6 +231,9 @@ type EntityRule struct {
 	// Since only some protocols have ports, if any ports are specified it requires the
 	// Protocol match in the Rule to be set to "TCP", "UDP", or "SCTP".
 	// +kubebuilder:validation:MaxItems=50
+	// +kubebuilder:validation:items:XIntOrString
+	// +kubebuilder:validation:items:MaxLength=15
+	// +kubebuilder:validation:items:XValidation:rule="type(self) != string || !self.contains(':') || int(self.split(':')[0]) <= int(self.split(':')[1])",message="port ranges must be written low:high",reason=FieldValueInvalid
 	// +listType=atomic
 	NotPorts []numorstring.Port `json:"notPorts,omitempty" validate:"omitempty,dive"`
 
@@ -246,11 +257,14 @@ type ServiceAccountMatch struct {
 	// Names is an optional field that restricts the rule to only apply to traffic that originates from (or terminates
 	// at) a pod running as a service account whose name is in the list.
 	// +listType=set
-	Names []string `json:"names,omitempty" validate:"omitempty"`
+	// +kubebuilder:validation:items:MaxLength=253
+	// +kubebuilder:validation:items:Pattern=`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
+	Names []string `json:"names,omitempty" validate:"omitempty,dive,name"`
 
 	// Selector is an optional field that restricts the rule to only apply to traffic that originates from
 	// (or terminates at) a pod running as a service account that matches the given label selector.
 	// If both Names and Selector are specified then they are AND'ed.
+	// +kubebuilder:validation:MaxLength=1024
 	Selector string `json:"selector,omitempty" validate:"omitempty,selector"`
 }
 
