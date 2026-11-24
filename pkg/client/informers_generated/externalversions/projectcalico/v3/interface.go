@@ -10,52 +10,52 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// BGPConfigurations returns a BGPConfigurationInformer.
-	BGPConfigurations() BGPConfigurationInformer
-	// BGPFilters returns a BGPFilterInformer.
-	BGPFilters() BGPFilterInformer
-	// BGPPeers returns a BGPPeerInformer.
-	BGPPeers() BGPPeerInformer
-	// BlockAffinities returns a BlockAffinityInformer.
-	BlockAffinities() BlockAffinityInformer
-	// CalicoNodeStatuses returns a CalicoNodeStatusInformer.
-	CalicoNodeStatuses() CalicoNodeStatusInformer
-	// ClusterInformations returns a ClusterInformationInformer.
-	ClusterInformations() ClusterInformationInformer
-	// FelixConfigurations returns a FelixConfigurationInformer.
-	FelixConfigurations() FelixConfigurationInformer
-	// GlobalNetworkPolicies returns a GlobalNetworkPolicyInformer.
-	GlobalNetworkPolicies() GlobalNetworkPolicyInformer
-	// GlobalNetworkSets returns a GlobalNetworkSetInformer.
-	GlobalNetworkSets() GlobalNetworkSetInformer
-	// HostEndpoints returns a HostEndpointInformer.
-	HostEndpoints() HostEndpointInformer
-	// IPAMBlocks returns a IPAMBlockInformer.
-	IPAMBlocks() IPAMBlockInformer
-	// IPAMConfigurations returns a IPAMConfigurationInformer.
-	IPAMConfigurations() IPAMConfigurationInformer
-	// IPAMHandles returns a IPAMHandleInformer.
-	IPAMHandles() IPAMHandleInformer
-	// IPPools returns a IPPoolInformer.
-	IPPools() IPPoolInformer
-	// IPReservations returns a IPReservationInformer.
-	IPReservations() IPReservationInformer
-	// KubeControllersConfigurations returns a KubeControllersConfigurationInformer.
-	KubeControllersConfigurations() KubeControllersConfigurationInformer
-	// NetworkPolicies returns a NetworkPolicyInformer.
-	NetworkPolicies() NetworkPolicyInformer
-	// NetworkSets returns a NetworkSetInformer.
-	NetworkSets() NetworkSetInformer
-	// Profiles returns a ProfileInformer.
-	Profiles() ProfileInformer
-	// StagedGlobalNetworkPolicies returns a StagedGlobalNetworkPolicyInformer.
-	StagedGlobalNetworkPolicies() StagedGlobalNetworkPolicyInformer
-	// StagedKubernetesNetworkPolicies returns a StagedKubernetesNetworkPolicyInformer.
-	StagedKubernetesNetworkPolicies() StagedKubernetesNetworkPolicyInformer
-	// StagedNetworkPolicies returns a StagedNetworkPolicyInformer.
-	StagedNetworkPolicies() StagedNetworkPolicyInformer
-	// Tiers returns a TierInformer.
-	Tiers() TierInformer
+	// BGPConfigurations returns a TypedBGPConfigurationInformer.
+	BGPConfigurations() TypedBGPConfigurationInformer
+	// BGPFilters returns a TypedBGPFilterInformer.
+	BGPFilters() TypedBGPFilterInformer
+	// BGPPeers returns a TypedBGPPeerInformer.
+	BGPPeers() TypedBGPPeerInformer
+	// BlockAffinities returns a TypedBlockAffinityInformer.
+	BlockAffinities() TypedBlockAffinityInformer
+	// CalicoNodeStatuses returns a TypedCalicoNodeStatusInformer.
+	CalicoNodeStatuses() TypedCalicoNodeStatusInformer
+	// ClusterInformations returns a TypedClusterInformationInformer.
+	ClusterInformations() TypedClusterInformationInformer
+	// FelixConfigurations returns a TypedFelixConfigurationInformer.
+	FelixConfigurations() TypedFelixConfigurationInformer
+	// GlobalNetworkPolicies returns a TypedGlobalNetworkPolicyInformer.
+	GlobalNetworkPolicies() TypedGlobalNetworkPolicyInformer
+	// GlobalNetworkSets returns a TypedGlobalNetworkSetInformer.
+	GlobalNetworkSets() TypedGlobalNetworkSetInformer
+	// HostEndpoints returns a TypedHostEndpointInformer.
+	HostEndpoints() TypedHostEndpointInformer
+	// IPAMBlocks returns a TypedIPAMBlockInformer.
+	IPAMBlocks() TypedIPAMBlockInformer
+	// IPAMConfigurations returns a TypedIPAMConfigurationInformer.
+	IPAMConfigurations() TypedIPAMConfigurationInformer
+	// IPAMHandles returns a TypedIPAMHandleInformer.
+	IPAMHandles() TypedIPAMHandleInformer
+	// IPPools returns a TypedIPPoolInformer.
+	IPPools() TypedIPPoolInformer
+	// IPReservations returns a TypedIPReservationInformer.
+	IPReservations() TypedIPReservationInformer
+	// KubeControllersConfigurations returns a TypedKubeControllersConfigurationInformer.
+	KubeControllersConfigurations() TypedKubeControllersConfigurationInformer
+	// NetworkPolicies returns a TypedNetworkPolicyInformer.
+	NetworkPolicies() TypedNetworkPolicyInformer
+	// NetworkSets returns a TypedNetworkSetInformer.
+	NetworkSets() TypedNetworkSetInformer
+	// Profiles returns a TypedProfileInformer.
+	Profiles() TypedProfileInformer
+	// StagedGlobalNetworkPolicies returns a TypedStagedGlobalNetworkPolicyInformer.
+	StagedGlobalNetworkPolicies() TypedStagedGlobalNetworkPolicyInformer
+	// StagedKubernetesNetworkPolicies returns a TypedStagedKubernetesNetworkPolicyInformer.
+	StagedKubernetesNetworkPolicies() TypedStagedKubernetesNetworkPolicyInformer
+	// StagedNetworkPolicies returns a TypedStagedNetworkPolicyInformer.
+	StagedNetworkPolicies() TypedStagedNetworkPolicyInformer
+	// Tiers returns a TypedTierInformer.
+	Tiers() TypedTierInformer
 }
 
 type version struct {
@@ -69,117 +69,117 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// BGPConfigurations returns a BGPConfigurationInformer.
-func (v *version) BGPConfigurations() BGPConfigurationInformer {
+// BGPConfigurations returns a TypedBGPConfigurationInformer.
+func (v *version) BGPConfigurations() TypedBGPConfigurationInformer {
 	return &bGPConfigurationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// BGPFilters returns a BGPFilterInformer.
-func (v *version) BGPFilters() BGPFilterInformer {
+// BGPFilters returns a TypedBGPFilterInformer.
+func (v *version) BGPFilters() TypedBGPFilterInformer {
 	return &bGPFilterInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// BGPPeers returns a BGPPeerInformer.
-func (v *version) BGPPeers() BGPPeerInformer {
+// BGPPeers returns a TypedBGPPeerInformer.
+func (v *version) BGPPeers() TypedBGPPeerInformer {
 	return &bGPPeerInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// BlockAffinities returns a BlockAffinityInformer.
-func (v *version) BlockAffinities() BlockAffinityInformer {
+// BlockAffinities returns a TypedBlockAffinityInformer.
+func (v *version) BlockAffinities() TypedBlockAffinityInformer {
 	return &blockAffinityInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// CalicoNodeStatuses returns a CalicoNodeStatusInformer.
-func (v *version) CalicoNodeStatuses() CalicoNodeStatusInformer {
+// CalicoNodeStatuses returns a TypedCalicoNodeStatusInformer.
+func (v *version) CalicoNodeStatuses() TypedCalicoNodeStatusInformer {
 	return &calicoNodeStatusInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// ClusterInformations returns a ClusterInformationInformer.
-func (v *version) ClusterInformations() ClusterInformationInformer {
+// ClusterInformations returns a TypedClusterInformationInformer.
+func (v *version) ClusterInformations() TypedClusterInformationInformer {
 	return &clusterInformationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// FelixConfigurations returns a FelixConfigurationInformer.
-func (v *version) FelixConfigurations() FelixConfigurationInformer {
+// FelixConfigurations returns a TypedFelixConfigurationInformer.
+func (v *version) FelixConfigurations() TypedFelixConfigurationInformer {
 	return &felixConfigurationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// GlobalNetworkPolicies returns a GlobalNetworkPolicyInformer.
-func (v *version) GlobalNetworkPolicies() GlobalNetworkPolicyInformer {
+// GlobalNetworkPolicies returns a TypedGlobalNetworkPolicyInformer.
+func (v *version) GlobalNetworkPolicies() TypedGlobalNetworkPolicyInformer {
 	return &globalNetworkPolicyInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// GlobalNetworkSets returns a GlobalNetworkSetInformer.
-func (v *version) GlobalNetworkSets() GlobalNetworkSetInformer {
+// GlobalNetworkSets returns a TypedGlobalNetworkSetInformer.
+func (v *version) GlobalNetworkSets() TypedGlobalNetworkSetInformer {
 	return &globalNetworkSetInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// HostEndpoints returns a HostEndpointInformer.
-func (v *version) HostEndpoints() HostEndpointInformer {
+// HostEndpoints returns a TypedHostEndpointInformer.
+func (v *version) HostEndpoints() TypedHostEndpointInformer {
 	return &hostEndpointInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// IPAMBlocks returns a IPAMBlockInformer.
-func (v *version) IPAMBlocks() IPAMBlockInformer {
+// IPAMBlocks returns a TypedIPAMBlockInformer.
+func (v *version) IPAMBlocks() TypedIPAMBlockInformer {
 	return &iPAMBlockInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// IPAMConfigurations returns a IPAMConfigurationInformer.
-func (v *version) IPAMConfigurations() IPAMConfigurationInformer {
+// IPAMConfigurations returns a TypedIPAMConfigurationInformer.
+func (v *version) IPAMConfigurations() TypedIPAMConfigurationInformer {
 	return &iPAMConfigurationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// IPAMHandles returns a IPAMHandleInformer.
-func (v *version) IPAMHandles() IPAMHandleInformer {
+// IPAMHandles returns a TypedIPAMHandleInformer.
+func (v *version) IPAMHandles() TypedIPAMHandleInformer {
 	return &iPAMHandleInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// IPPools returns a IPPoolInformer.
-func (v *version) IPPools() IPPoolInformer {
+// IPPools returns a TypedIPPoolInformer.
+func (v *version) IPPools() TypedIPPoolInformer {
 	return &iPPoolInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// IPReservations returns a IPReservationInformer.
-func (v *version) IPReservations() IPReservationInformer {
+// IPReservations returns a TypedIPReservationInformer.
+func (v *version) IPReservations() TypedIPReservationInformer {
 	return &iPReservationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// KubeControllersConfigurations returns a KubeControllersConfigurationInformer.
-func (v *version) KubeControllersConfigurations() KubeControllersConfigurationInformer {
+// KubeControllersConfigurations returns a TypedKubeControllersConfigurationInformer.
+func (v *version) KubeControllersConfigurations() TypedKubeControllersConfigurationInformer {
 	return &kubeControllersConfigurationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// NetworkPolicies returns a NetworkPolicyInformer.
-func (v *version) NetworkPolicies() NetworkPolicyInformer {
+// NetworkPolicies returns a TypedNetworkPolicyInformer.
+func (v *version) NetworkPolicies() TypedNetworkPolicyInformer {
 	return &networkPolicyInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// NetworkSets returns a NetworkSetInformer.
-func (v *version) NetworkSets() NetworkSetInformer {
+// NetworkSets returns a TypedNetworkSetInformer.
+func (v *version) NetworkSets() TypedNetworkSetInformer {
 	return &networkSetInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Profiles returns a ProfileInformer.
-func (v *version) Profiles() ProfileInformer {
+// Profiles returns a TypedProfileInformer.
+func (v *version) Profiles() TypedProfileInformer {
 	return &profileInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// StagedGlobalNetworkPolicies returns a StagedGlobalNetworkPolicyInformer.
-func (v *version) StagedGlobalNetworkPolicies() StagedGlobalNetworkPolicyInformer {
+// StagedGlobalNetworkPolicies returns a TypedStagedGlobalNetworkPolicyInformer.
+func (v *version) StagedGlobalNetworkPolicies() TypedStagedGlobalNetworkPolicyInformer {
 	return &stagedGlobalNetworkPolicyInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
-// StagedKubernetesNetworkPolicies returns a StagedKubernetesNetworkPolicyInformer.
-func (v *version) StagedKubernetesNetworkPolicies() StagedKubernetesNetworkPolicyInformer {
+// StagedKubernetesNetworkPolicies returns a TypedStagedKubernetesNetworkPolicyInformer.
+func (v *version) StagedKubernetesNetworkPolicies() TypedStagedKubernetesNetworkPolicyInformer {
 	return &stagedKubernetesNetworkPolicyInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// StagedNetworkPolicies returns a StagedNetworkPolicyInformer.
-func (v *version) StagedNetworkPolicies() StagedNetworkPolicyInformer {
+// StagedNetworkPolicies returns a TypedStagedNetworkPolicyInformer.
+func (v *version) StagedNetworkPolicies() TypedStagedNetworkPolicyInformer {
 	return &stagedNetworkPolicyInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Tiers returns a TierInformer.
-func (v *version) Tiers() TierInformer {
+// Tiers returns a TypedTierInformer.
+func (v *version) Tiers() TypedTierInformer {
 	return &tierInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
